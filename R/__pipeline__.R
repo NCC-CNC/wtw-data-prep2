@@ -15,7 +15,7 @@ init_project_folder(
 
 # Build 1km grid ----
 source("R/02_aoi_to_1km_grid.R")
-print("02 AOI to 1km grid...")
+print("02 Transforming AOI to 1km grid...")
 pu1km <- aoi_to_grid(
   natdata_dir = prep_paths$natdata_dir,
   project_dir = prep_paths$project_dir,
@@ -24,7 +24,7 @@ pu1km <- aoi_to_grid(
 
 # Pull 1km datasets ----
 source("R/03_natdata.R")
-print("03 1km Natdata...")
+print("03 Extracting 1km National data...")
 natdata(
   natdata_dir = prep_paths$natdata_dir,
   project_dir = prep_paths$project_dir
@@ -32,7 +32,7 @@ natdata(
 
 # Build WTW project metadata ----
 source("R/04_metadata.R")
-print("04 Metadata...")
+print("04 Building Metadata...")
 create_wtw_metadata(
   natdata_dir = prep_paths$natdata_dir,
   project_dir = prep_paths$project_dir
@@ -40,7 +40,7 @@ create_wtw_metadata(
 
 # Build WTW project ----
 source("R/05_wtw.R")
-print("05 WTW...")
+print("05 Building WTW project...")
 build_wtw_project(
   project_dir = prep_paths$project_dir,
   author = wtw$author,
