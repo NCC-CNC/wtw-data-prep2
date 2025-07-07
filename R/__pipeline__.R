@@ -16,7 +16,7 @@ init_project_folder(
 # Build 1km grid ----
 source("R/02_aoi_to_1km_grid.R")
 print("02 Transforming AOI to 1km grid...")
-pu1km <- aoi_to_grid(
+aoi_to_grid(
   natdata_dir = prep_paths$natdata_dir,
   project_dir = prep_paths$project_dir,
   aoi_shp = prep_paths$aoi_shp
