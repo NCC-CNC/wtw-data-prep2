@@ -9,6 +9,7 @@ setup <- function() {
     "glue",
     "prioritizr",
     "RcppTOML",
+    "RColorBrewer",
     "readxl",
     "R6",
     "sf",
@@ -16,6 +17,7 @@ setup <- function() {
     "terra",
     "tibble",
     "uuid",
+    "viridisLite", 
     "yaml"
   )
   
