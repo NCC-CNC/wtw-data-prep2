@@ -1,8 +1,8 @@
 # Set up
 source("R/00_setup.R")
 print("00 Setup ...")
-terra::gdalCache(size = 8000) # Set GDAL cache size to 8GB
 configs <- setup()
+terra::gdalCache(size = 8000) # Set GDAL cache size to 8GB
 prep_paths <- configs$paths
 wtw <- configs$wtw
 

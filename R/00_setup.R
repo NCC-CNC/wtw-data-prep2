@@ -4,6 +4,7 @@ setup <- function() {
   required_pkgs <- c(
     "assertthat",
     "data.table",
+    "gdalUtilities",
     "dplyr",
     "glue",
     "prioritizr",
