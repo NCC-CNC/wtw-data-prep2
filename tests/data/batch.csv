@@ -1,0 +1,4 @@
+full_path,shp_name,unit,data_type
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\waterbody_on,LAKE,ha,vector
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\watercourse_on,RIVER,km,vector
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\hydro_obstacles_on,HYDRO,count,vector
