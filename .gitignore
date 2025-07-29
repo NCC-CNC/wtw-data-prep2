@@ -4,3 +4,5 @@
 .Ruserdata
 
 .Rbuildignore
+
+Python/__pycache__/
