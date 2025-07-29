@@ -1,21 +1,20 @@
 import arcpy
 
-def conversion_props(vector, metric):
+def conversion_props(vector, unit):
   # get geometry
   geometry_type = arcpy.Describe(vector).shapeType
-  arcpy.AddMessage(f"Geometry type: {geometry_type}")
   # return geometry type and unit conversion properties
-  if geometry_type == "Polygon" and metric == "m2":
+  if geometry_type == "Polygon" and unit == "m2":
     return ["SHAPE@AREA", 1]
-  elif geometry_type == "Polygon" and metric == "ha":
+  elif geometry_type == "Polygon" and unit == "ha":
     return ["SHAPE@AREA", 10000]
-  elif geometry_type == "Polygon" and metric == "km2":
+  elif geometry_type == "Polygon" and unit == "km2":
     return ["SHAPE@AREA", 1000000]
-  elif geometry_type == "Polyline" and metric == "m":
+  elif geometry_type == "Polyline" and unit == "m":
     return ["SHAPE@LENGTH", 1]
-  elif geometry_type == "Polyline" and metric == "km":
+  elif geometry_type == "Polyline" and unit == "km":
     return ["SHAPE@LENGTH", 1000]
-  elif geometry_type == "Point" or geometry_type == "MultiPoint" and metric == "count":
+  elif geometry_type == "Point" or geometry_type == "MultiPoint" and unit == "count":
     return ["SHAPE@XY", 1]
   else:
-    raise ValueError(f"Error: unsupported, {geometry_type} / {metric}")
+    raise ValueError(f"Error: unsupported, {geometry_type} / {unit}")
