@@ -46,5 +46,6 @@ build_wtw_project(
   author = wtw$author,
   email = wtw$email,
   groups = wtw$groups,
-  project_name = wtw$project_name
+  project_name = wtw$project_name,
+  file_name = wtw$file_name
 )
