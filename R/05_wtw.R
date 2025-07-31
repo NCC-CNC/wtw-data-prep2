@@ -3,7 +3,7 @@ source("R/wtw_class_Dataset.R")
 source("R/wtw_fct_enc2ascii.R")
 source("R/wtw_fct_color_palette.R")
 source("R/wtw_fct_write_project.R")
-build_wtw_project <- function(project_dir, author, email, groups, project_name) {
+build_wtw_project <- function(project_dir, author, email, groups, project_name, file_name) {
   
   meta_path <- file.path(project_dir, "wtw/metadata/wtw-metadata.csv") 
   pu_path <- file.path(project_dir,"aoi/pu_1km.tif")
@@ -262,10 +262,10 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name) 
     excludes_params = excludes_params,
     dataset = dataset,
     name = project_name, 
-    path = file.path(project_dir, "WTW", "configs.yaml"),
-    spatial_path = file.path(project_dir, "WTW", "spatial.tif"),
-    attribute_path = file.path(project_dir, "WTW", "attribute.csv.gz"), 
-    boundary_path = file.path(project_dir, "WTW", "boundary.csv.gz"),
+    path = file.path(project_dir, "WTW", paste0(file_name, "-configs.yaml")),
+    spatial_path = file.path(project_dir, "WTW", paste0(file_name, "-spatial.tif")),
+    attribute_path = file.path(project_dir, "WTW", paste0(file_name, "-attribute.csv.gz")), 
+    boundary_path = file.path(project_dir, "WTW", paste0(file_name, "-boundary.csv.gz")),
     mode = "advanced",
     user_groups = groups,
     author_name = author, 
