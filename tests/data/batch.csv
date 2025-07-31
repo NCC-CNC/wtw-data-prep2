@@ -1,4 +1,4 @@
-conversion_ready_input,short_name,tif_output,unit
-C:\Github\wtw-data-prep2\tests\data\vector.gdb\waterbody_on,LAKE,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Lakes.tif,ha
-C:\Github\wtw-data-prep2\tests\data\vector.gdb\watercourse_on,RIVER,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Rivers.tif,km
-C:\Github\wtw-data-prep2\tests\data\vector.gdb\hydro_obstacles_on,HYDRO,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Hydro.tif,count
+conversion_ready_input,short_name,tif_output,unit,provenance
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\waterbody_on,LAKE,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Lakes.tif,ha,regional
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\watercourse_on,RIVER,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Rivers.tif,km,regional
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\hydro_obstacles_on,HYDRO,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Hydro.tif,count,regional
