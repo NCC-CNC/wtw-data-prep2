@@ -1,5 +1,6 @@
 
 create_project_folder <- function(project_dir) {
+  # Create folder structure
   suppressWarnings(dir.create(project_dir))
   suppressWarnings(dir.create(file.path(project_dir, "aoi")))
   suppressWarnings((dir.create(file.path(project_dir, "tifs"))))
@@ -23,4 +24,21 @@ create_project_folder <- function(project_dir) {
   suppressWarnings((dir.create(file.path(project_dir, "tifs", "excludes"))))
   suppressWarnings(dir.create(file.path(project_dir, "wtw")))
   suppressWarnings(dir.create(file.path(project_dir, "wtw", "metadata")))
+  suppressWarnings(dir.create(file.path(project_dir, "dataprep")))
+  suppressWarnings(dir.create(file.path(project_dir, "dataprep", "national")))
+  suppressWarnings(dir.create(file.path(project_dir, "dataprep", "regional")))
+  
+  # Add csv and save to dataprep
+  data.frame(
+    conversion_ready_input = "full filepath to input data",
+    short_name = "10 characters or less name for variable",
+    tif_output = "full filepath with extension to output tif",
+    unit = "supported units: m2, ha, km2, m, km and count",
+    provenance = "national or regional",
+    stringsAsFactors = FALSE
+  ) |>
+    write.csv(
+      file = file.path(project_dir, "dataprep", "dataprep.csv"),
+      row.names = FALSE
+    )
 }
