@@ -6,3 +6,5 @@
 .Rbuildignore
 
 Python/__pycache__/
+
+*.lock
