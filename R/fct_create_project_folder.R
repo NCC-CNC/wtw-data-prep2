@@ -31,6 +31,7 @@ create_project_folder <- function(project_dir) {
   suppressWarnings(dir.create(file.path(project_dir, "dataprep")))
   suppressWarnings(dir.create(file.path(project_dir, "dataprep", "national")))
   suppressWarnings(dir.create(file.path(project_dir, "dataprep", "regional")))
+  suppressWarnings(dir.create(file.path(project_dir, "dataprep", "tmp")))
   
   # Add csv and save to dataprep
   data.frame(
