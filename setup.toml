@@ -1,6 +1,6 @@
 [local]
 project_dir = "C:/Data/PRZ/WTW/REG_ON/ELOC_v2"
-natdata_dir = "C:/Data/PRZ/NAT_DATA/NAT_DATA_20250707"
+natdata_dir = "C:/Data/PRZ/NAT_DATA/NAT_DATA_20250801"
 aoi_shp = "ELOC_NA_Boundry_Final.shp"
 
 [wtw]

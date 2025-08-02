@@ -52,6 +52,15 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
     } else if (grepl("species/iucn_rept", tif_path)) {
       wtw_species_meta_row <- dplyr::filter(wtw_species_meta$IUCN_REPT, File == tif_name)
       wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, path == "themes/species/iucn_rept")
+    } else if (grepl("species/nsc_end", tif_path)) {
+      wtw_species_meta_row <- dplyr::filter(wtw_species_meta$NSC_END, File == tif_name)
+      wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, path == "themes/species/nsc_end")
+    } else if (grepl("species/nsc_sar", tif_path)) {
+      wtw_species_meta_row <- dplyr::filter(wtw_species_meta$NSC_SAR, File == tif_name)
+      wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, path == "themes/species/nsc_sar")
+    } else if (grepl("species/nsc_spp", tif_path)) {
+      wtw_species_meta_row <- dplyr::filter(wtw_species_meta$NSC_SPP, File == tif_name)
+      wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, path == "themes/species/nsc_spp")
     } else {
       wtw_species_meta_row <- NULL
       wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, wtw_file_name == tif_name)
@@ -118,6 +127,12 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
       short_name == "IUCN_MAMM" & u_values == 1 ~ "#b15928",
       short_name == "IUCN_REPT" & u_values == 2 ~ legend_color,
       short_name == "IUCN_REPT" & u_values == 1 ~ "#b2df8a",
+      short_name == "NSC_END" & u_values == 2 ~ legend_color,
+      short_name == "NSC_END" & u_values == 1 ~ "#4575b4",
+      short_name == "NSC_SAR" & u_values == 2 ~ legend_color,
+      short_name == "NSC_SAR" & u_values == 1 ~ "#d73027",
+      short_name == "NSC_SPP" & u_values == 2 ~ legend_color,
+      short_name == "NSC_SPP" & u_values == 1 ~ "#e6f598",
       short_name == "KBA" & u_values == 2 ~ legend_color,
       short_name == "KBA" & u_values == 1 ~ "#1c9099",
       short_name == "CPCAD" & u_values == 2 ~ legend_color,
@@ -128,9 +143,9 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
     ## LABELS ------------------------------------------------------------------
     legend_label <- dplyr::pull(wtw_prep_meta_row, legend_label)
     LABELS <- dplyr::case_when(
-      short_name == "ECCC_CH"   & u_values == 2 ~ "Non Habitat, Habitat",
+      short_name == "ECCC_CH"   & u_values == 2 ~ legend_label,
       short_name == "ECCC_CH"   & u_values == 1 ~ "Habitat",
-      short_name == "ECCC_SAR"  & u_values == 2 ~ "Non Range, Range",
+      short_name == "ECCC_SAR"  & u_values == 2 ~ legend_label,
       short_name == "ECCC_SAR"  & u_values == 1 ~ "Range",
       short_name == "IUCN_AMPH" & u_values == 2 ~ legend_label,
       short_name == "IUCN_AMPH" & u_values == 1 ~ "Habitat",
@@ -140,6 +155,12 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
       short_name == "IUCN_MAMM" & u_values == 1 ~ "Habitat",
       short_name == "IUCN_REPT" & u_values == 2 ~ legend_label,
       short_name == "IUCN_REPT" & u_values == 1 ~ "Habitat",
+      short_name == "NSC_END" & u_values == 2 ~ legend_label,
+      short_name == "NSC_END" & u_values == 1 ~ "Occurrence",
+      short_name == "NSC_SAR" & u_values == 2 ~ legend_label,
+      short_name == "NSC_SAR" & u_values == 1 ~ "Occurrence",
+      short_name == "NSC_SPP" & u_values == 2 ~ legend_label,
+      short_name == "NSC_SPP" & u_values == 1 ~ "Occurrence",
       short_name == "KBA" & u_values == 2 ~ legend_label,
       short_name == "KBA" & u_values == 1 ~ "KBA",
       short_name == "CPCAD" & u_values == 2 ~ legend_label,

@@ -3,10 +3,10 @@ source("R/utils_rij.R")
 
 natdata <- function(natdata_dir, project_dir) {
   
-  # Read-in wtw prep metadata
+  # Read-in wtw prep metadata, filter for only active data
   wtw_prep_meta <- read.csv(
     file.path(natdata_dir, "WTW_NAT_PREP_METADATA.csv")
-  )
+  ) |> dplyr::filter(active == TRUE)
   
   # NCC planning units
   grid_template_path <- file.path(natdata_dir, "_1km/idx.tif" )
