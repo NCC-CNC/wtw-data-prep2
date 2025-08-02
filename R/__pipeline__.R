@@ -1,3 +1,6 @@
+# Start timer
+start_time <- Sys.time()
+
 # Set up
 source("R/00_setup.R")
 print("00 Setup ...")
@@ -49,3 +52,7 @@ build_wtw_project(
   project_name = wtw$project_name,
   file_name = wtw$file_name
 )
+
+# End timer
+end_time <- Sys.time()
+end_time - start_time
