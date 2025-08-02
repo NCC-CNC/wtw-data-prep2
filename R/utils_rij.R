@@ -30,8 +30,9 @@ rij_to_raster <- function(
   
   for (i in seq_along(data_rows)) {
     
+    source <- toupper(gsub("_", " ", basename(output_folder)))
     name <- data_rows[i]
-    if (verbose) message(sprintf("... %d of %d: %s", i, length(data_rows), name))
+    if (verbose) message(paste0(source, " - ", i, " of ", length(data_rows), ": ", name))
     
     r <- ncc_1km_idx
     terra::values(r)[idx] <- rij_data_clipped[name, ]
