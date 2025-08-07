@@ -5,38 +5,48 @@ source("R/wtw_fct_color_palette.R")
 source("R/wtw_fct_write_project.R")
 build_wtw_project <- function(project_dir, author, email, groups, project_name, file_name) {
   
+  # Build file paths
   meta_path <- file.path(project_dir, "wtw/metadata/wtw-metadata.csv") 
   pu_path <- file.path(project_dir,"aoi/pu_1km.tif")
-  tifs_path <- file.path(project_dir, "tifs")
-  tif_files_full_path <- list.files(tifs_path, pattern = "\\.tif$", recursive = TRUE, full.names = TRUE)
-  tif_files <- basename(tif_files_full_path)
   
-  # 3.0 Import meta data and PUs -------------------------------------------------
+  # Recursively get all TIFs in the project /tif directory
+  tif_files_full_path <- list.files(
+    file.path(project_dir, "tifs"), 
+    pattern = "\\.tif$", 
+    recursive = TRUE, 
+    full.names = TRUE
+  )
   
-  ## Import formatted csv (metadata) as tibble 
+  # Create TIF tibble
+  tif_tbl <- tibble::tibble(
+    full_path = tif_files_full_path,
+    folder = dirname(tif_files_full_path),
+    name = basename(tif_files_full_path)
+  )
+  
+  # Import formatted wtw-metadata.csv as tibble and join tif_tbl
   metadata <- tibble::as_tibble(
     utils::read.table(
       meta_path, stringsAsFactors = FALSE, sep = ",", header = TRUE,
       comment.char = "", quote="\""
     )
-  )
+  ) |> dplyr::left_join(tif_tbl, by = c("File" = "name"))
   
-  ## Validate metadata
+  # Validate metadata
   assertthat::assert_that(
     all(metadata$Type %in% c("theme", "include", "weight", "exclude")),
-    all(tif_files %in% metadata$File)
+    all(tif_tbl$name %in% metadata$File)
   )
   
-  ## Import study area (planning units) raster
+  ## Import planning unit raster
   pu <- terra::rast(pu_path)
   
+  # Import rasters -------------------------------------------------------------
   
-  # 3.1 Import rasters -----------------------------------------------------------
-  
-  ## Import theme, weight, include and exclude rasters as a list of SpatRasters 
+  ## Import theme, weight, include and exclude rasters as a list of SpatRaster 
   ## objects. If raster variable does not compare to planning unit, re-project raster 
   ## variable so it aligns to the study area.
-  raster_data <- lapply(tif_files_full_path, function(x) {
+  raster_data <- lapply(metadata$full_path, function(x) {
     raster_x <- terra::rast(x)
     names(raster_x) <- tools::file_path_sans_ext(basename(x)) # file name
     if (terra::compareGeom(pu, raster_x, stopOnError=FALSE)) {
@@ -51,7 +61,7 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
   ## Convert list to a combined SpatRaster
   raster_data <- do.call(c, raster_data)
   
-  # 4.0 Pre-processing -----------------------------------------------------------
+  # Pre-processing -------------------------------------------------------------
   
   ## Prepare theme inputs ----
   theme_data <- raster_data[[which(metadata$Type == "theme")]]
