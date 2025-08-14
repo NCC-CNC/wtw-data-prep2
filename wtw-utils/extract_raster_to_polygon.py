@@ -1,6 +1,7 @@
 import arcpy
 import os
 import subprocess
+import pandas as pd
 
 # Allow overwrite
 arcpy.env.overwriteOutput = True
@@ -9,7 +10,7 @@ arcpy.env.overwriteOutput = True
 path_to_poly = arcpy.GetParameterAsText(0)
 path_to_raster = arcpy.GetParameterAsText(1)
 stat = arcpy.GetParameterAsText(2)          
-col_name = arcpy.GetParameterAsText(3)      
+col_name = arcpy.GetParameterAsText(3)       
 path_to_temp = arcpy.GetParameterAsText(4)
 csv = arcpy.GetParameterAsText(5)           
 
@@ -54,13 +55,39 @@ if result.stderr:
 # Exit if R failed
 if result.returncode != 0:
     arcpy.AddError(f"R script failed with code {result.returncode}")
+
+# Get column names from csv (if provided)
+if csv:
+  batch_csv = pd.read_csv(csv)
+  col_name = batch_csv["short_name"].tolist()
+
+# Convert one-off col name to list  
+if isinstance(col_name, str):
+    col_name = [col_name]
+  
+# Delete existing fields if they exists
+existing_fields = [f.name for f in arcpy.ListFields(path_to_poly)]
+for field in col_name:
+    if field in existing_fields:
+        arcpy.DeleteField_management(path_to_poly, field)
+        arcpy.AddMessage(f"... Deleting existing field: {field}")
+    # Add field as DOUBLE        
+    arcpy.AddField_management(path_to_poly, field, "DOUBLE")
     
-# Join feilds to polygon
+# Read-in r_extract.csv
+df = pd.read_csv(os.path.join(path_to_temp, "r_extract.csv"))
+# Create dictionary: WTWID -> {field: value, ...}
+r_dict = df.set_index("WTWID")[col_name].to_dict(orient="index")
+# Get list of fields
+fields = ["WTWID"] + col_name
+
+# Update polygon with values from r_extract.csv, dicitonary
 arcpy.AddMessage("... Joining extractions to polygon")
-arcpy.management.JoinField(
-  in_data=path_to_poly,
-  in_field="WTWID",
-  join_table= os.path.join(path_to_temp, "r_extract.csv"),
-  join_field="WTWID",
-  fields=col_name
-)
+with arcpy.da.UpdateCursor(path_to_poly, fields) as cursor:
+    for row in cursor:
+        wtwid = row[0]
+        if wtwid in r_dict:
+            for i, field in enumerate(col_name, start=1):
+                row[i] = r_dict[wtwid][field]  # assign numeric value
+            cursor.updateRow(row)
+  

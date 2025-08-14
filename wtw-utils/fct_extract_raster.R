@@ -29,8 +29,8 @@ extract_raster <- function(path_to_poly, path_to_raster, stat, col_name, path_to
         force_df = TRUE
       )
       
-      ### add extracted values as new column
-      poly[[batch_df$short_name[i]]] <- vals[[1]]
+      ### add extracted values as new column, round to 4 decimal places
+      poly[[batch_df$short_name[i]]] <- as.numeric(round(vals[[1]], 4))
       
     }
     
@@ -49,8 +49,8 @@ extract_raster <- function(path_to_poly, path_to_raster, stat, col_name, path_to
       force_df = TRUE
     )
     
-    ## add extracted values as new column
-    poly[[col_name]] <- vals[[1]]
+    ## add extracted values as new column, round to 4 decimal places
+    poly[[col_name]] <-  as.numeric(round(vals[[1]], 4))
     
   }
 
@@ -58,6 +58,7 @@ extract_raster <- function(path_to_poly, path_to_raster, stat, col_name, path_to
   write.csv(
     sf::st_drop_geometry(poly), 
     file = file.path(path_to_temp, "r_extract.csv"), 
-    row.names = FALSE
+    row.names = FALSE,
+    quote = FALSE
   )
 }
