@@ -9,14 +9,25 @@ arcpy.env.overwriteOutput = True
 # Get user params
 path_to_poly = arcpy.GetParameterAsText(0)
 path_to_raster = arcpy.GetParameterAsText(1)
-stat = arcpy.GetParameterAsText(2)          
-col_name = arcpy.GetParameterAsText(3)       
-path_to_temp = arcpy.GetParameterAsText(4)
-csv = arcpy.GetParameterAsText(5)           
+stat = arcpy.GetParameterAsText(2)
+cell_value = arcpy.GetParameterAsText(3)
+col_name = arcpy.GetParameterAsText(4)       
+path_to_temp = arcpy.GetParameterAsText(5)
+csv = arcpy.GetParameterAsText(6)           
 
+# cell value must be provided if the statistic is area or count
+if stat == "area" or stat == "count":
+  if not cell_value:
+      arcpy.AddError("Please provide a cell value for area or count statistics.")
+      raise ValueError("Cell value is required for area or count statistics.")
+  
 # If user submited a feature class, get the full path
 if (arcpy.Describe(path_to_poly).dataType == "FeatureLayer"):
   path_to_poly = arcpy.Describe(path_to_poly).catalogPath
+  
+# If user submited a Raster Layer, get the full path
+if (arcpy.Describe(path_to_raster).dataType == "RasterLayer"):
+  path_to_raster = arcpy.Describe(path_to_raster).catalogPath
 
 # Create wtw id
 arcpy.AddField_management(path_to_poly, "WTWID", "LONG")
@@ -39,22 +50,44 @@ cmd = [
     col_name,
     path_to_temp,
 ]
+
+# append cell value if provided
+if cell_value:
+    cmd.append(cell_value)
+
 # append csv path if provided
 if csv:
     cmd.append(csv)
 
 # Run R script
 arcpy.AddMessage("... Running R script")
-result = subprocess.run(cmd, capture_output=True, text=True)
 
-# Log R output/errors
-arcpy.AddMessage("R Output:\n" + result.stdout)
-if result.stderr:
-    arcpy.AddWarning("R:\n" + result.stderr)
+try:
+  result = subprocess.Popen(
+      cmd,
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      text=True,
+      bufsize=1  # line-buffered output
+  )
+  
+  # Stream stdout in real time
+  for line in result.stdout:
+      arcpy.AddMessage("R: " + line.rstrip())
+  
+  # Stream stderr in real time
+  for line in result.stderr:
+      arcpy.AddWarning("R: " + line.rstrip())
+  
+  # Wait for process to finish
+  result.wait()
+      
+  if result.returncode != 0:
+      arcpy.AddError(f"R script failed with code {result.returncode}")
 
-# Exit if R failed
-if result.returncode != 0:
-    arcpy.AddError(f"R script failed with code {result.returncode}")
+except Exception as e:
+  arcpy.AddError(f"Failed to run R script: {e}")
+
 
 # Get column names from csv (if provided)
 if csv:
@@ -65,14 +98,10 @@ if csv:
 if isinstance(col_name, str):
     col_name = [col_name]
   
-# Delete existing fields if they exists
-existing_fields = [f.name for f in arcpy.ListFields(path_to_poly)]
+# Add new field
 for field in col_name:
-    if field in existing_fields:
-        arcpy.DeleteField_management(path_to_poly, field)
-        arcpy.AddMessage(f"... Deleting existing field: {field}")
-    # Add field as DOUBLE        
-    arcpy.AddField_management(path_to_poly, field, "DOUBLE")
+  # Add field as DOUBLE        
+  arcpy.AddField_management(path_to_poly, field, "DOUBLE")
     
 # Read-in r_extract.csv
 df = pd.read_csv(os.path.join(path_to_temp, "r_extract.csv"))
@@ -80,6 +109,8 @@ df = pd.read_csv(os.path.join(path_to_temp, "r_extract.csv"))
 r_dict = df.set_index("WTWID")[col_name].to_dict(orient="index")
 # Get list of fields
 fields = ["WTWID"] + col_name
+
+arcpy.AddMessage(fields)
 
 # Update polygon with values from r_extract.csv, dicitonary
 arcpy.AddMessage("... Joining extractions to polygon")

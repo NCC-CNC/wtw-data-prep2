@@ -3,7 +3,7 @@ install_required_packages <- function(pkgs) {
   for (pkg in pkgs) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       message(sprintf("Installing %s...", pkg))
-      install.packages(pkg, repos = "https://cloud.r-project.org")
+      install.packages(pkg)
     } 
   }
 }
