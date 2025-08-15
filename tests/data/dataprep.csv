@@ -1,0 +1,8 @@
+conversion_ready_input,short_name,tif_output,unit,stat,cell_value,datatype,provenance
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\waterbody_on,LAKE,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Lakes.tif,ha,,,vector,regional
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\watercourse_on,RIVER,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Rivers.tif,km,,,vector,regional
+C:\Github\wtw-data-prep2\tests\data\vector.gdb\hydro_obstacles_on,HYDRO,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_Hydro.tif,count,,,vector,regional
+C:\Github\wtw-data-prep2\tests\data\tifs\LU2020_u18_v4_2022_02.tif,LU,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_LU.tif,,area,42,raster,reginoal
+C:\Github\wtw-data-prep2\tests\data\tifs\T_NAT_HABITAT_Forest_AAFC_LUTS_2020_NFIS_2022_ha_1km_rounded.tif,muFOR,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_muFOR.tif,,mean,,raster,national
+C:\Github\wtw-data-prep2\tests\data\tifs\T_NAT_HABITAT_Wetlands_CanVec_SaturatedSoils_2019_ha_1km_rounded.tif,maxWET,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_maxWet.tif,,max,,raster,national
+C:\Github\wtw-data-prep2\tests\data\tifs\T_NAT_HABITATL_Rivers_CanVec_Water_LinearFlow_2019_km_1km.tif,modeLAKE,C:/Github/wtw-data-prep2/tests/data/tifs/T_REG_modeLake.tif,,mode,,raster,national

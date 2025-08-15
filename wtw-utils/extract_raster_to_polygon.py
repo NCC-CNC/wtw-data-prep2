@@ -18,8 +18,8 @@ csv = arcpy.GetParameterAsText(6)
 # cell value must be provided if the statistic is area or count
 if stat == "area":
   if not cell_value:
-      arcpy.AddError("Please provide a cell value for area or count statistics.")
-      raise ValueError("Cell value is required for area or count statistics.")
+      arcpy.AddError("Please provide a cell value for area stat.")
+      raise ValueError("Cell value is required for area stat.")
   
 # If user submited a feature class, get the full path
 if (arcpy.Describe(path_to_poly).dataType == "FeatureLayer"):
