@@ -24,6 +24,8 @@ if stat == "area" or stat == "count":
 # If user submited a feature class, get the full path
 if (arcpy.Describe(path_to_poly).dataType == "FeatureLayer"):
   path_to_poly = arcpy.Describe(path_to_poly).catalogPath
+# get polygon file name
+poly_file_name = os.path.basename(path_to_poly)
   
 # If user submited a Raster Layer, get the full path
 if (arcpy.Describe(path_to_raster).dataType == "RasterLayer"):
@@ -110,10 +112,8 @@ r_dict = df.set_index("WTWID")[col_name].to_dict(orient="index")
 # Get list of fields
 fields = ["WTWID"] + col_name
 
-arcpy.AddMessage(fields)
-
 # Update polygon with values from r_extract.csv, dicitonary
-arcpy.AddMessage("... Joining extractions to polygon")
+arcpy.AddMessage(f"Joining extractions to {poly_file_name}")
 with arcpy.da.UpdateCursor(path_to_poly, fields) as cursor:
     for row in cursor:
         wtwid = row[0]
