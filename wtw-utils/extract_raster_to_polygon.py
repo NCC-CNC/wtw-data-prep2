@@ -16,7 +16,7 @@ path_to_temp = arcpy.GetParameterAsText(5)
 csv = arcpy.GetParameterAsText(6)           
 
 # cell value must be provided if the statistic is area or count
-if stat == "area" or stat == "count":
+if stat == "area":
   if not cell_value:
       arcpy.AddError("Please provide a cell value for area or count statistics.")
       raise ValueError("Cell value is required for area or count statistics.")
