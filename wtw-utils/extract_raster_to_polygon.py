@@ -15,6 +15,10 @@ col_name = arcpy.GetParameterAsText(4)
 path_to_temp = arcpy.GetParameterAsText(5)
 csv = arcpy.GetParameterAsText(6)           
 
+if csv:
+  csv_file_name = os.path.basename(csv)
+  arcpy.AddMessage(f"Accessing data in: {csv_file_name}")
+
 # cell value must be provided if the statistic is area or count
 if stat == "area":
   if not cell_value:
@@ -110,7 +114,7 @@ fields = ["WTWID"] + col_name
 
 # Update polygon with values from r_extract.csv, dicitonary
 arcpy.AddMessage(f"Joining extractions to {poly_file_name}")
-arcpy.AddMessage(col_name)
+arcpy.AddMessage(f"Fields: {col_name}")
 with arcpy.da.UpdateCursor(path_to_poly, fields) as cursor:
     for row in cursor:
         wtwid = row[0]

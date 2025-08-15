@@ -15,22 +15,20 @@ extract_raster <- function(
   poly_df <- sf::st_drop_geometry(poly) |> # used to store data
     dplyr::select(WTWID)
   
-  print(head(poly_df))
-  
   # Build input table
-  if (!is.null(csv)) {
-    input_df <- read.csv(csv, stringsAsFactors = FALSE) |>
-      dplyr::filter(datatype == "raster")
-  } else {
+  if (csv == "") {
     input_df <- data.frame(
       conversion_ready_input = path_to_raster,
       short_name = col_name,
       stat = stat,
       cell_value = ifelse(is.null(cell_value), NULL, cell_value),
       stringsAsFactors = FALSE
-    )
+    )    
+  } else {
+    input_df <- read.csv(csv, stringsAsFactors = FALSE) |>
+      dplyr::filter(datatype == "raster")
   }  
-  
+
   # Set global flags for exact extract
   coverage_area = FALSE
   include_cell = FALSE
