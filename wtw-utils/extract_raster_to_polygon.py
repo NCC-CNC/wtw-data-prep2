@@ -28,8 +28,9 @@ if (arcpy.Describe(path_to_poly).dataType == "FeatureLayer"):
 poly_file_name = os.path.basename(path_to_poly)
   
 # If user submited a Raster Layer, get the full path
-if (arcpy.Describe(path_to_raster).dataType == "RasterLayer"):
-  path_to_raster = arcpy.Describe(path_to_raster).catalogPath
+if path_to_raster:
+  if (arcpy.Describe(path_to_raster).dataType == "RasterLayer"):
+    path_to_raster = arcpy.Describe(path_to_raster).catalogPath
 
 # Create wtw id
 arcpy.AddField_management(path_to_poly, "WTWID", "LONG")
@@ -51,15 +52,9 @@ cmd = [
     stat,
     col_name,
     path_to_temp,
+    cell_value or "",
+    csv or ""
 ]
-
-# append cell value if provided
-if cell_value:
-    cmd.append(cell_value)
-
-# append csv path if provided
-if csv:
-    cmd.append(csv)
 
 # Run R script
 arcpy.AddMessage("... Running R script")
@@ -94,6 +89,7 @@ except Exception as e:
 # Get column names from csv (if provided)
 if csv:
   batch_csv = pd.read_csv(csv)
+  batch_csv = batch_csv[batch_csv["datatype"] == "raster"]
   col_name = batch_csv["short_name"].tolist()
 
 # Convert one-off col name to list  
@@ -104,7 +100,7 @@ if isinstance(col_name, str):
 for field in col_name:
   # Add field as DOUBLE        
   arcpy.AddField_management(path_to_poly, field, "DOUBLE")
-    
+
 # Read-in r_extract.csv
 df = pd.read_csv(os.path.join(path_to_temp, "r_extract.csv"))
 # Create dictionary: WTWID -> {field: value, ...}
@@ -114,6 +110,7 @@ fields = ["WTWID"] + col_name
 
 # Update polygon with values from r_extract.csv, dicitonary
 arcpy.AddMessage(f"Joining extractions to {poly_file_name}")
+arcpy.AddMessage(col_name)
 with arcpy.da.UpdateCursor(path_to_poly, fields) as cursor:
     for row in cursor:
         wtwid = row[0]
