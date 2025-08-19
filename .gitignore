@@ -10,3 +10,11 @@ Python/__pycache__/
 *.lock
 
 wtw-utils/__pycache__/
+
+wtw-utils/test_extract_raster.R
+
+*.tfw
+
+*.xml
+
+*.cpg
