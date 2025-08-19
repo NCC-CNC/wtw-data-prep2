@@ -39,6 +39,9 @@ create_project_folder <- function(project_dir) {
     short_name = "10 characters or less name for variable",
     tif_output = "full filepath with extension to output tif",
     unit = "supported units: m2, ha, km2, m, km and count",
+    stat = "supported stats: mean, max, min, sum, stdev, mode and area ",
+    cell_value = "if stat is area, provide cell value to extract",
+    datatype = "supported types: raster, vector",
     provenance = "national or regional",
     stringsAsFactors = FALSE
   ) |>

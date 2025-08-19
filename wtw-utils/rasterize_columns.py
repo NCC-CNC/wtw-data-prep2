@@ -10,7 +10,8 @@ arcpy.env.overwriteOutput = True
 input_poly = arcpy.GetParameterAsText(0)
 input_raster_planning_units = arcpy.GetParameterAsText(1)
 input_multi_params = arcpy.GetParameterAsText(2)
-input_batch = arcpy.GetParameterAsText(3)
+output_folder = arcpy.GetParameterAsText(3)
+input_csv = arcpy.GetParameterAsText(4)
 
 # Set environments
 arcpy.env.snapRaster = input_raster_planning_units
@@ -20,19 +21,21 @@ arcpy.env.cellSize = input_raster_planning_units
 field_lst = []
 output_lst = []
 
-# Shape tool input parameters
-if input_multi_params:
-  multi_params = input_multi_params.split(";")
-  for x in multi_params:
-      field, output_folder, tif_name = x.split(" ")
-      field_lst.append(field)
-      output_lst.append(os.path.join(output_folder, tif_name))
-
-# Shape batch input paramters
-if input_batch:
-  batch_df = pd.read_csv(input_batch)
+# Shape csv input paramters
+if input_csv:
+  csv_file_name = os.path.basename(input_csv)
+  arcpy.AddMessage(f"{csv_file_name} provided, using batch inputs.")
+  batch_df = pd.read_csv(input_csv)
   field_lst.extend(batch_df['short_name'].tolist())
   output_lst.extend(batch_df['tif_output'].tolist())
+else:
+  arcpy.AddMessage("No dataprep.csv provided, using single input.")
+  # If no csv provided, use single input  
+  multi_params = input_multi_params.split(";")
+  for x in multi_params:
+      field, tif_name = x.split(" ")
+      field_lst.append(field)
+      output_lst.append(os.path.join(output_folder, tif_name))
 
 # Process each list item
 l = len(field_lst)
