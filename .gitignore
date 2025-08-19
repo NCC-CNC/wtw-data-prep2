@@ -18,3 +18,11 @@ wtw-utils/test_extract_raster.R
 *.xml
 
 *.cpg
+
+tests/data/tifs/LU2020_u18_v4_2022_02.tif
+
+tests/data/tifs/T_NAT_HABITAT_Forest_AAFC_LUTS_2020_NFIS_2022_ha_1km_rounded.tif
+
+tests/data/tifs/T_NAT_HABITAT_Wetlands_CanVec_SaturatedSoils_2019_ha_1km_rounded.tif
+
+tests/data/tifs/T_NAT_HABITATL_Rivers_CanVec_Water_LinearFlow_2019_km_1km.tif
