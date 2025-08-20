@@ -13,7 +13,7 @@ def punits(cell_size, units):
 
 # Get user params
 input_poly = arcpy.GetParameterAsText(0)
-input_cell_size = float(arcpy.GetParameterAsText(1))
+input_cell_size = int(arcpy.GetParameterAsText(1))
 input_units = arcpy.GetParameterAsText(2)
 nested = arcpy.GetParameterAsText(3)
 output_folder = arcpy.GetParameterAsText(4)
@@ -81,6 +81,25 @@ rgrid_output = os.path.join(output_folder, f"rgrid_{int(input_cell_size)}{input_
 arcpy.management.CopyFeatures(
   in_features = fishnet_x,
   out_feature_class = vgrid_output
+)
+
+# Calculate geomtry
+arcpy.AddMessage("... Calculating geometry attributes")
+if input_units == "km":
+    display_units = "km2"
+    area_unit = "SQUARE_KILOMETERS"
+elif input_units == "ha":
+    display_units = "ha"
+    area_unit = "HECTARES"
+elif input_units == "m":
+    display_units = "m2"
+    area_unit = "SQUARE_METERS"
+area_field = "Area_" + display_units
+arcpy.AddField_management(vgrid_output, area_field, "DOUBLE")
+arcpy.management.CalculateGeometryAttributes(
+    in_features = vgrid_output,
+    geometry_property = [[area_field, "AREA"]],
+    area_unit = area_unit
 )
 
 # Create raster grid
