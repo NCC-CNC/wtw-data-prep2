@@ -1,7 +1,6 @@
 # wtw-data-prep2
 Core R pipeline for generating WTW projects, supported by a custom ArcGIS toolbox
 for including regional data.
-
 **Refer to the Where To Work Data Prep Manual for complete instructions.**
 
 #### Hardware Dependencies
