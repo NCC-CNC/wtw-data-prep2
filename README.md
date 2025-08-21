@@ -18,5 +18,7 @@ for including regional data.
 - Personal GitHub account: needed to clone and sync IT managed GitHub repos locally.
 
 #### Data Dependencies
-- NAT_DATA Bundle (S:\CONS_TECH\PRZ\DATA\NAT_DATA\__VERSIONS__)  
+- NAT_DATA bundle (S:\CONS_TECH\PRZ\DATA\NAT_DATA\__VERSIONS__) 
+- Conversion-ready regional vector/raster layers
+- Area of Interest (AOI) shapefile polygon
 
