@@ -1,3 +1,14 @@
+#' Setup WTW Project
+#' 
+#' Installs any missing R packages required by the WTW project, reads in
+#' `setup.toml`, and stores user-specific paths and configuration settings
+#' in memory.
+#'
+#' @return A list with two elements.
+#' "paths" capture directories specified in the setup.toml under "local".
+#' "wtw" captures WTW-specific settings specified in the setup.toml under "wtw".
+#' 
+#' -----------------------------------------------------------------------------
 
 setup <- function() {
   

@@ -1,4 +1,36 @@
+#' Build a WTW Project
+#'
+#' Constructs a complete WTW (Where to Work) project from project directory inputs,
+#' metadata, and raster datasets. This function validates raster alignment with 
+#' planning units, organizes theme, weight, include, and exclude layers, and 
+#' writes a fully configured WTW project.
+#' 
+#' @param project_dir Character. Path to the project directory containing:
+#' - `aoi/pu_1km.tif`: Planning unit raster.
+#' - `tifs/`: Directory with format-ready input raster files.
+#' - `wtw/metadata/wtw-metadata.csv`: Metadata file describing raster layers.
+#' 
+#' @param author Character. Name of the project author.
+#' 
+#' @param email Character. Email address of the project author.
+#' 
+#' @param groups Character. User groups that will have access to the project.
+#' Options include "public" or "private". If set to "public", the WTW project 
+#' copied to the server will be made avaiable for public access. 
+#' 
+#' @param project_name Character. Display name of the WTW project.
+#' 
+#' @param file_name Character. Base name for output project files.
+#' 
+#'  @return Side effects: writes 4 WTW project files to disk:
+#'  - configuration.yaml
+#'  - spatial.tif
+#'  - attribute.csv.gz
+#'  - boundary.csv.gz
+#'  
+#'------------------------------------------------------------------------------  
 
+# Source functions
 source("R/wtw_class_Dataset.R")
 source("R/wtw_fct_enc2ascii.R")
 source("R/wtw_fct_color_palette.R")

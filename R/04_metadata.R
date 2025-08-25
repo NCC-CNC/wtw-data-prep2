@@ -1,6 +1,23 @@
+#' Create wtw-metadata .csv
+#'
+#' Reads national WTW species and preparation metadata, combines it with
+#' raster statistics from the project’s TIF files, and generates a complete
+#' WTW metadata CSV for use in the WTW formatting script.
+#' 
+#' @param project_dir Character. Path to the project directory containing the
+#'   `tifs` folder and the output `wtw/metadata` folder.
+#'   
+#' @param natdata_dir Character. Path to the national data directory containing
+#'   WTW metadata files: 
+#'   - `WTW_NAT_SPECIES_METADATA.xlsx`
+#'   - `WTW_NAT_PREP_METADATA.csv`
+#'   
+#' @return Side effect: writes wtw-metadata.csv file.
+#' 
+#' -----------------------------------------------------------------------------
 
+# Source function
 source("R/fct_init_metadata.R")
-
 create_wtw_metadata <- function(project_dir, natdata_dir) {
   
   TIF_DIR <- file.path(project_dir, "tifs")
