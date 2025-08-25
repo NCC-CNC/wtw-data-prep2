@@ -1,6 +1,22 @@
+#' Export National Data that intersects Planning Units
+#'
+#' Reads WTW prep metadata and aligns pu_1km.tif to the canada-wide planning unit 
+#' grid. For each active dataset, "clips" it to the AOI, and exports the layer 
+#' as TIF to the WTW project directory.
+#' 
+#' @param natdata_dir Character. Path to the national data directory containing
+#'   the `_1km` raster template and WTW metadata CSV (`WTW_NAT_PREP_METADATA.csv`).
+#'   
+#' @param project_dir Character. Path to the project directory containing the AOI
+#'   planning unit raster (`pu_1km.tif`) and destination folders for output TIFs.
+
+#' @return Side effects: writes national data to the `/tifs` WTW project folder.
+#' 
+#' -----------------------------------------------------------------------------
+
+# Source functions
 source("R/fct_align_pu.R")
 source("R/utils_rij.R")
-
 natdata <- function(natdata_dir, project_dir) {
   
   # Read-in wtw prep metadata, filter for only active data

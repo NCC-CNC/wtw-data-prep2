@@ -1,7 +1,26 @@
+#' Create a 1km Planning Unit Grid from an AOI
+#'
+#' Generates a 1km raster and vector grid within a user-defined Area of 
+#' Interest (AOI), based on a raster template from national data. The grids are 
+#' written to the WTW project directory.
+#'
+#' @param natdata_dir Character. Path to the national data directory containing 
+#' the 1 km raster template (`_1km/idx.tif`).
+#' 
+#' @param project_dir Character. Path to the project directory where AOI and 
+#' grids will be saved.
+#' 
+#' @param aoi_shp Character. Filename of the AOI shapefile located in the 
+#' `aoi` folder of the project directory.
+#' 
+#' @return Side effects: writes pu_1km.shp and pu_1km.tif to the `aoi` folder.
+#' 
+#' @seealso [create_1km_grid()]
+#' 
+#' -----------------------------------------------------------------------------
 
 # Source function
 source("R/fct_create_1km_grid.R")
-
 aoi_to_grid <- function(natdata_dir, project_dir, aoi_shp) {
   
   # Get 1km raster grid template
