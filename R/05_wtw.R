@@ -160,7 +160,7 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
     exclude_legend <- metadata$Legend[metadata$Type == "exclude"]
     exclude_labels <- metadata$Labels[metadata$Type == "exclude"]
     exclude_hidden <- metadata$Hidden[metadata$Type == "exclude"]
-    exclude_downloadble <- metadata$Downloadable[metadata$Type == "exclude"]
+    exclude_downloadable <- metadata$Downloadable[metadata$Type == "exclude"]
   } else {
     exclude_data <- NULL
     excludes_params <- NULL # no excludes in project
