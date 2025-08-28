@@ -106,6 +106,7 @@ extract_raster <- function(
       # -- ALL OTHER STATS --- 
       ## add extracted values as new column, round to 4 decimal places
       poly_df[[col_name]] <- round(vals[[1]], 4)
+      poly_df[[col_name]][is.na(poly_df[[col_name]])] <- 0 # replace NA with 0
     }
  }
 
