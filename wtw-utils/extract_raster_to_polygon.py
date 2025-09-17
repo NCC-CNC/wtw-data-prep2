@@ -13,11 +13,18 @@ stat = arcpy.GetParameterAsText(2)
 cell_value = arcpy.GetParameterAsText(3)
 col_name = arcpy.GetParameterAsText(4)       
 path_to_temp = arcpy.GetParameterAsText(5)
-csv = arcpy.GetParameterAsText(6)           
+csv = arcpy.GetParameterAsText(6)
+r_path = arcpy.GetParameterAsText(7) 
 
 if csv:
   csv_file_name = os.path.basename(csv)
   arcpy.AddMessage(f"Accessing data in: {csv_file_name}")
+
+# directory that has Rscript.exe  
+if r_path:
+  r_path = os.path.join(r_path, "bin", "Rscript.exe")
+else:
+  r_path = "Rscript" # Assumes Rscript is in PATH
 
 # cell value must be provided if the statistic is area or count
 if stat == "area":
@@ -49,7 +56,7 @@ r_script = os.path.join(script_folder, "run_extract_raster.R")
 
 # Build command
 cmd = [
-    "Rscript",
+    r_path,
     r_script,
     path_to_poly,
     path_to_raster,
