@@ -1,100 +1,128 @@
 #' Build a WTW Project
 #'
 #' Constructs a complete WTW (Where to Work) project from project directory inputs,
-#' metadata, and raster datasets. This function validates raster alignment with 
-#' planning units, organizes theme, weight, include, and exclude layers, and 
+#' metadata, and raster datasets. This function validates raster alignment with
+#' planning units, organizes theme, weight, include, and exclude layers, and
 #' writes a fully configured WTW project.
-#' 
+#'
 #' @param project_dir Character. Path to the project directory containing:
-#' - `aoi/pu_1km.tif`: Planning unit raster.
+#' - `aoi/`: Directory with the planning unit raster.
 #' - `tifs/`: Directory with format-ready input raster files.
-#' - `wtw/metadata/wtw-metadata.csv`: Metadata file describing raster layers.
-#' 
-#' @param author Character. Name of the project author.
-#' 
-#' @param email Character. Email address of the project author.
-#' 
+#' - `wtw/metadata/`: Directory with the WTW metadata CSV file.
+#' Configured via `project_dir` under the `[local]` table in `setup.toml`.
+#'
+#' @param punits Character. Relative path (from `project_dir`) to the planning
+#' unit raster file (e.g., `"aoi/pu_1km.tif"`). Configured via `punits` under
+#' the `[local]` table in `setup.toml`.
+#'
+#' @param wtw_metadata Character. Relative path (from `project_dir`) to the
+#' WTW metadata CSV file describing raster layers
+#' (e.g., `"wtw/metadata/wtw-metadata.csv"`). Configured via `wtw_metadata`
+#' under the `[local]` table in `setup.toml`.
+#'
+#' @param author Character. Name of the project author. Configured via `author`
+#' under the `[wtw]` table in `setup.toml`.
+#'
+#' @param email Character. Email address of the project author. Configured via
+#' `email` under the `[wtw]` table in `setup.toml`.
+#'
 #' @param groups Character. User groups that will have access to the project.
-#' Options include "public" or "private". If set to "public", the WTW project 
-#' copied to the server will be made avaiable for public access. 
-#' 
-#' @param project_name Character. Display name of the WTW project.
-#' 
-#' @param file_name Character. Base name for output project files.
-#' 
+#' Options include "public" or "private". If set to "public", the WTW project
+#' copied to the server will be made available for public access. Configured via
+#' `groups` under the `[wtw]` table in `setup.toml`.
+#'
+#' @param project_name Character. Display name of the WTW project. Configured
+#' via `project_name` under the `[wtw]` table in `setup.toml`.
+#'
+#' @param file_name Character. Base name for output project files. Configured
+#' via `file_name` under the `[wtw]` table in `setup.toml`.
+#'
 #'  @return Side effects: writes 4 WTW project files to disk:
 #'  - configuration.yaml
 #'  - spatial.tif
 #'  - attribute.csv.gz
 #'  - boundary.csv.gz
-#'  
-#'------------------------------------------------------------------------------  
+#'
+#'------------------------------------------------------------------------------
 
 # Source functions
 source("R/wtw_class_Dataset.R")
 source("R/wtw_fct_enc2ascii.R")
 source("R/wtw_fct_color_palette.R")
 source("R/wtw_fct_write_project.R")
-build_wtw_project <- function(project_dir, author, email, groups, project_name, file_name) {
-  
+build_wtw_project <- function(
+  project_dir,
+  punits,
+  wtw_metadata,
+  author,
+  email,
+  groups,
+  project_name,
+  file_name
+) {
   # Build file paths
-  meta_path <- file.path(project_dir, "wtw/metadata/wtw-metadata.csv") 
-  pu_path <- file.path(project_dir,"aoi/pu_1km.tif")
-  
+  meta_path <- file.path(project_dir, wtw_metadata)
+  pu_path <- file.path(project_dir, punits)
+
   # Recursively get all TIFs in the project /tif directory
   tif_files_full_path <- list.files(
-    file.path(project_dir, "tifs"), 
-    pattern = "\\.tif$", 
-    recursive = TRUE, 
+    file.path(project_dir, "tifs"),
+    pattern = "\\.tif$",
+    recursive = TRUE,
     full.names = TRUE
   )
-  
+
   # Create TIF tibble
   tif_tbl <- tibble::tibble(
     full_path = tif_files_full_path,
     folder = dirname(tif_files_full_path),
     name = basename(tif_files_full_path)
   )
-  
+
   # Import formatted wtw-metadata.csv as tibble and join tif_tbl
   metadata <- tibble::as_tibble(
     utils::read.table(
-      meta_path, stringsAsFactors = FALSE, sep = ",", header = TRUE,
-      comment.char = "", quote="\""
+      meta_path,
+      stringsAsFactors = FALSE,
+      sep = ",",
+      header = TRUE,
+      comment.char = "",
+      quote = "\""
     )
-  ) |> dplyr::left_join(tif_tbl, by = c("File" = "name"))
-  
+  ) |>
+    dplyr::left_join(tif_tbl, by = c("File" = "name"))
+
   # Validate metadata
   assertthat::assert_that(
     all(metadata$Type %in% c("theme", "include", "weight", "exclude")),
     all(tif_tbl$name %in% metadata$File)
   )
-  
+
   ## Import planning unit raster
   pu <- terra::rast(pu_path)
-  
+
   # Import rasters -------------------------------------------------------------
-  
-  ## Import theme, weight, include and exclude rasters as a list of SpatRaster 
-  ## objects. If raster variable does not compare to planning unit, re-project raster 
+
+  ## Import theme, weight, include and exclude rasters as a list of SpatRaster
+  ## objects. If raster variable does not compare to planning unit, re-project raster
   ## variable so it aligns to the study area.
   raster_data <- lapply(metadata$full_path, function(x) {
     raster_x <- terra::rast(x)
     names(raster_x) <- tools::file_path_sans_ext(basename(x)) # file name
-    if (terra::compareGeom(pu, raster_x, stopOnError=FALSE)) {
+    if (terra::compareGeom(pu, raster_x, stopOnError = FALSE)) {
       raster_x
     } else {
       print(paste0(names(raster_x), ": can not stack"))
       print(paste0("... aligning to ", names(pu)))
       terra::project(raster_x, y = pu, method = "near")
     }
-  }) 
-  
+  })
+
   ## Convert list to a combined SpatRaster
   raster_data <- do.call(c, raster_data)
-  
+
   # Pre-processing -------------------------------------------------------------
-  
+
   ## Prepare theme inputs ----
   theme_data <- raster_data[[which(metadata$Type == "theme")]]
   names(theme_data) <- gsub(".", "_", names(theme_data), fixed = TRUE)
@@ -110,7 +138,7 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
   theme_values <- metadata$Values[metadata$Type == "theme"]
   theme_goals <- metadata$Goal[metadata$Type == "theme"]
   theme_downloadble <- metadata$Downloadable[metadata$Type == "theme"]
-  
+
   ## Prepare weight inputs (if there are any) ----
   if ("weight" %in% unique(metadata$Type)) {
     weight_data <- raster_data[[which(metadata$Type == "weight")]]
@@ -129,11 +157,14 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
     weight_data <- NULL
     weights_params <- NULL # no weights in project
   }
-  
+
   ## Prepare include inputs (if there are any) ----
   if ("include" %in% unique(metadata$Type)) {
     include_data <- raster_data[[which(metadata$Type == "include")]]
-    include_data <- terra::classify(include_data, matrix(c(-Inf,0.5,0, 0.5,Inf,1), ncol = 3, byrow = TRUE))
+    include_data <- terra::classify(
+      include_data,
+      matrix(c(-Inf, 0.5, 0, 0.5, Inf, 1), ncol = 3, byrow = TRUE)
+    )
     include_names <- metadata$Name[metadata$Type == "include"]
     include_colors <- metadata$Color[metadata$Type == "include"]
     include_units <- metadata$Unit[metadata$Type == "include"]
@@ -147,11 +178,14 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
     include_data <- NULL
     includes_params <- NULL # no includes in project
   }
-  
+
   ## Prepare exclude inputs (if there are any) ----
   if ("exclude" %in% unique(metadata$Type)) {
     exclude_data <- raster_data[[which(metadata$Type == "exclude")]]
-    exclude_data <- terra::classify(exclude_data, matrix(c(-Inf,0.5,0, 0.5,Inf,1), ncol = 3, byrow = TRUE))
+    exclude_data <- terra::classify(
+      exclude_data,
+      matrix(c(-Inf, 0.5, 0, 0.5, Inf, 1), ncol = 3, byrow = TRUE)
+    )
     exclude_names <- metadata$Name[metadata$Type == "exclude"]
     exclude_colors <- metadata$Color[metadata$Type == "exclude"]
     exclude_units <- metadata$Unit[metadata$Type == "exclude"]
@@ -165,54 +199,55 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
     exclude_data <- NULL
     excludes_params <- NULL # no excludes in project
   }
-  
- # Build WTW dataset -----------------------------------------------------------  
+
+  # Build WTW dataset -----------------------------------------------------------
   dataset <- new_dataset_from_auto(
     c(theme_data, weight_data, include_data, exclude_data)
   )
-  
+
   # Build the themes_params list -----------------------------------------------
   themes_params <- lapply(unique(theme_groups), function(x) {
     # Get indices for features in this group
     idx <- which(theme_groups == x)
-      # Build feature list
-      features <- lapply(idx, function(i) {
-        if (theme_legend[i] == "manual") {
-          legend <- list(
-            type = "manual",
-            # values = c(as.numeric(trimws(unlist(strsplit(theme_values[i], ","))))),
-            colors = c(trimws(unlist(strsplit(theme_colors[i], ",")))),
-            labels = c(trimws(unlist(strsplit(theme_labels[i], ","))))
-          ) } else {
-            legend <- list(
-              type = "continuous",
-              colors = color_palette(theme_colors[i])
-            )
-          }
-        list(
-          name = theme_names[i],
-          variable = list(
-            index = names(theme_data)[i],
-            units = theme_units[i],
-            legend = legend,
-            provenance = theme_provenance[i]
-          ),
-          status = TRUE,
-          visible = theme_visible[i],
-          hidden = theme_hidden[i],
-          downloadable = theme_downloadble[i],
-          goal = theme_goals[i],
-          limit_goal = 0
+    # Build feature list
+    features <- lapply(idx, function(i) {
+      if (theme_legend[i] == "manual") {
+        legend <- list(
+          type = "manual",
+          # values = c(as.numeric(trimws(unlist(strsplit(theme_values[i], ","))))),
+          colors = c(trimws(unlist(strsplit(theme_colors[i], ",")))),
+          labels = c(trimws(unlist(strsplit(theme_labels[i], ","))))
         )
-      })
+      } else {
+        legend <- list(
+          type = "continuous",
+          colors = color_palette(theme_colors[i])
+        )
+      }
+      list(
+        name = theme_names[i],
+        variable = list(
+          index = names(theme_data)[i],
+          units = theme_units[i],
+          legend = legend,
+          provenance = theme_provenance[i]
+        ),
+        status = TRUE,
+        visible = theme_visible[i],
+        hidden = theme_hidden[i],
+        downloadable = theme_downloadble[i],
+        goal = theme_goals[i],
+        limit_goal = 0
+      )
+    })
     list(
       name = x,
       feature = features
     )
   })
-  
-#  Build the weight_params list ------------------------------------------------
-  if(!is.null(weight_data)) {
+
+  #  Build the weight_params list ------------------------------------------------
+  if (!is.null(weight_data)) {
     weights_params <- lapply(seq_len(terra::nlyr(weight_data)), function(i) {
       # Legend setup
       if (weight_legend[i] == "manual") {
@@ -243,7 +278,7 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
       )
     })
   }
-  
+
   #  Build the include_params list ---------------------------------------------
   if (!is.null(include_data)) {
     includes_params <- lapply(seq_len(terra::nlyr(include_data)), function(i) {
@@ -269,7 +304,7 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
       )
     })
   }
-  
+
   #  Build the exclude_params list ---------------------------------------------
   if (!is.null(exclude_data)) {
     excludes_params <- lapply(seq_len(terra::nlyr(exclude_data)), function(i) {
@@ -303,20 +338,31 @@ build_wtw_project <- function(project_dir, author, email, groups, project_name, 
     includes_params = includes_params,
     excludes_params = excludes_params,
     dataset = dataset,
-    name = project_name, 
+    name = project_name,
     path = file.path(project_dir, "WTW", paste0(file_name, "-configs.yaml")),
-    spatial_path = file.path(project_dir, "WTW", paste0(file_name, "-spatial.tif")),
-    attribute_path = file.path(project_dir, "WTW", paste0(file_name, "-attribute.csv.gz")), 
-    boundary_path = file.path(project_dir, "WTW", paste0(file_name, "-boundary.csv.gz")),
+    spatial_path = file.path(
+      project_dir,
+      "WTW",
+      paste0(file_name, "-spatial.tif")
+    ),
+    attribute_path = file.path(
+      project_dir,
+      "WTW",
+      paste0(file_name, "-attribute.csv.gz")
+    ),
+    boundary_path = file.path(
+      project_dir,
+      "WTW",
+      paste0(file_name, "-boundary.csv.gz")
+    ),
     mode = "advanced",
     user_groups = groups,
-    author_name = author, 
-    author_email = email 
+    author_name = author,
+    author_email = email
   )
-  
+
   # Clear environment ----------------------------------------------------------
   ## Comment these lines below to keep all the objects in the R session
-  rm(list=ls())
+  rm(list = ls())
   gc()
-  
 }
