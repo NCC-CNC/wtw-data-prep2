@@ -80,23 +80,59 @@ build_wtw_project <- function(
   )
 
   # Import formatted wtw-metadata.csv as tibble and join tif_tbl
-  metadata <- tibble::as_tibble(
-    utils::read.table(
-      meta_path,
-      stringsAsFactors = FALSE,
-      sep = ",",
-      header = TRUE,
-      comment.char = "",
-      quote = "\""
-    )
+  meta_encoding <- readr::guess_encoding(meta_path)$encoding[1]
+  metadata <- readr::read_csv(
+    meta_path,
+    locale = readr::locale(encoding = meta_encoding),
+    show_col_types = FALSE,
+    comment = ""
   ) |>
     dplyr::left_join(tif_tbl, by = c("File" = "name"))
 
   # Validate metadata
-  assertthat::assert_that(
-    all(metadata$Type %in% c("theme", "include", "weight", "exclude")),
-    all(tif_tbl$name %in% metadata$File)
-  )
+  valid_types <- c("theme", "include", "weight", "exclude")
+
+  ## Check 1: metadata files not found in tifs/
+  missing_idx <- which(is.na(metadata$full_path))
+  if (length(missing_idx) > 0) {
+    stop(
+      "The following files are listed in metadata but not found in tifs/:\n",
+      paste0(
+        "  - Row ", missing_idx + 1,
+        ": ", metadata$File[missing_idx],
+        " (Name: '", metadata$Name[missing_idx], "'",
+        ", Type: '", metadata$Type[missing_idx], "')",
+        collapse = "\n"
+      )
+    )
+  }
+
+  ## Check 2: tif files not referenced in metadata
+  missing_from_meta <- tif_tbl$name[!tif_tbl$name %in% metadata$File]
+  if (length(missing_from_meta) > 0) {
+    stop(
+      "The following tif files have no entry in the metadata:\n",
+      paste0("  - ", missing_from_meta, collapse = "\n")
+    )
+  }
+
+  ## Check 3: invalid Type values
+  invalid_types <- metadata[!metadata$Type %in% valid_types, c("File", "Type")]
+  if (nrow(invalid_types) > 0) {
+    stop(
+      "The following metadata rows have invalid Type values (must be one of: ",
+      paste(valid_types, collapse = ", "),
+      "):\n",
+      paste0(
+        "  - ",
+        invalid_types$File,
+        " (Type = '",
+        invalid_types$Type,
+        "')",
+        collapse = "\n"
+      )
+    )
+  }
 
   ## Import planning unit raster
   pu <- terra::rast(pu_path)
