@@ -1,4 +1,3 @@
-
 #' Write project
 #'
 #' Save a project to disk.
@@ -76,22 +75,21 @@
 #'  )
 #' @export
 write_project <- function(
-    themes_params = NULL,
-    weights_params = NULL,
-    includes_params = NULL,
-    excludes_params = NULL, 
-    dataset, 
-    path, 
-    name,
-    spatial_path, 
-    attribute_path, 
-    boundary_path,
-    mode = "advanced",
-    user_groups = "public",
-    author_name = NULL, 
-    author_email = NULL
-    ) {
-  
+  themes_params = NULL,
+  weights_params = NULL,
+  includes_params = NULL,
+  excludes_params = NULL,
+  dataset,
+  path,
+  name,
+  spatial_path,
+  attribute_path,
+  boundary_path,
+  mode = "advanced",
+  user_groups = "public",
+  author_name = NULL,
+  author_email = NULL
+) {
   # create full settings list
   ## add project name
   params <- list()
@@ -104,10 +102,10 @@ write_project <- function(
   }
   ## add data prep date
   params$data_prep_date <- as.character(Sys.Date())
-  ## add wheretowork version 
-  params$wheretowork_version <- "1.2.5"
+  ## add wheretowork version
+  params$wheretowork_version <- "1.2.7"
   ## add prioritizr version
-  params$prioritizr_version <- "8.0.6"  
+  params$prioritizr_version <- "8.0.6"
   ## specify application mode
   params$mode <- mode
   ## add user groups
@@ -120,16 +118,16 @@ write_project <- function(
   params$weights <- weights_params
   params$includes <- includes_params
   params$excludes <- excludes_params
-  
-  # coerce characters to ASCII
-  params <- enc2ascii(params)
-  
+
+  # coerce characters to ASCII-safe; keep fields support special characters
+  params <- enc2ascii_keep(params, keep = c("name", "author_name"))
+
   # save configuration file to disk
-  yaml::write_yaml(params, path)
-  
+  yaml::write_yaml(params, path, fileEncoding = "UTF-8")
+
   # save dataset to disk
   dataset$write(spatial_path, attribute_path, boundary_path)
-  
+
   # return success
   invisible(TRUE)
 }
