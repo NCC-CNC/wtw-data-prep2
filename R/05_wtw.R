@@ -50,6 +50,7 @@ source("R/wtw_class_Dataset.R")
 source("R/wtw_fct_enc2ascii.R")
 source("R/wtw_fct_color_palette.R")
 source("R/wtw_fct_write_project.R")
+source("R/fct_validate_manual_legend.R")
 build_wtw_project <- function(
   project_dir,
   punits,
@@ -98,10 +99,16 @@ build_wtw_project <- function(
     stop(
       "The following files are listed in metadata but not found in tifs/:\n",
       paste0(
-        "  - Row ", missing_idx + 1,
-        ": ", metadata$File[missing_idx],
-        " (Name: '", metadata$Name[missing_idx], "'",
-        ", Type: '", metadata$Type[missing_idx], "')",
+        "  - Row ",
+        missing_idx + 1,
+        ": ",
+        metadata$File[missing_idx],
+        " (Name: '",
+        metadata$Name[missing_idx],
+        "'",
+        ", Type: '",
+        metadata$Type[missing_idx],
+        "')",
         collapse = "\n"
       )
     )
@@ -142,9 +149,35 @@ build_wtw_project <- function(
   ## Import theme, weight, include and exclude rasters as a list of SpatRaster
   ## objects. If raster variable does not compare to planning unit, re-project raster
   ## variable so it aligns to the study area.
-  raster_data <- lapply(metadata$full_path, function(x) {
-    raster_x <- terra::rast(x)
-    names(raster_x) <- tools::file_path_sans_ext(basename(x)) # file name
+  ## Also validates manual legend rows: raster unique values vs Values/Color/Labels.
+  manual_legend_msgs <- character(0)
+  raster_data <- lapply(seq_len(nrow(metadata)), function(i) {
+    raster_x <- terra::rast(metadata$full_path[i])
+    names(raster_x) <- tools::file_path_sans_ext(basename(metadata$full_path[
+      i
+    ]))
+
+    # Check 4: validate manual legend lengths against raster unique values
+    if (metadata$Legend[i] == "manual") {
+      legend_errors <- validate_manual_legend(
+        raster_x,
+        metadata$Values[i],
+        metadata$Color[i],
+        metadata$Labels[i]
+      )
+      if (length(legend_errors) > 0) {
+        msg <- sprintf(
+          "  - Row %d: %s (Name: '%s')\n    %s",
+          i + 1,
+          metadata$File[i],
+          metadata$Name[i],
+          paste(legend_errors, collapse = "; ")
+        )
+        manual_legend_msgs <<- c(manual_legend_msgs, msg)
+      }
+    }
+
+    # Align to planning unit if needed
     if (terra::compareGeom(pu, raster_x, stopOnError = FALSE)) {
       raster_x
     } else {
@@ -153,6 +186,14 @@ build_wtw_project <- function(
       terra::project(raster_x, y = pu, method = "near")
     }
   })
+
+  ## Check 4: stop if any manual legend mismatches were found
+  if (length(manual_legend_msgs) > 0) {
+    stop(
+      "Mismatch between raster values and metadata for manual legends:\n",
+      paste(manual_legend_msgs, collapse = "\n")
+    )
+  }
 
   ## Convert list to a combined SpatRaster
   raster_data <- do.call(c, raster_data)
