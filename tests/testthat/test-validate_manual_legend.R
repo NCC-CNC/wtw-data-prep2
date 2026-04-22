@@ -1,4 +1,4 @@
-source(file.path("R", "fct_validate_manual_legend.R"))
+source(file.path("..", "..", "R", "fct_validate_manual_legend.R"))
 
 # Helper: create a single-band SpatRaster with given values
 make_raster <- function(values) {

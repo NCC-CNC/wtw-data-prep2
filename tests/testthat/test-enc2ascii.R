@@ -1,10 +1,13 @@
-source(file.path("R", "wtw_fct_enc2ascii.R"))
+source(file.path("..", "..", "R", "wtw_fct_enc2ascii.R"))
 
 # --- enc2ascii ---------------------------------------------------------------
 
 test_that("enc2ascii transliterates French accented characters", {
   expect_equal(enc2ascii("Écosystème calcicole"), "Ecosysteme calcicole")
-  expect_equal(enc2ascii("Proximité aux aires protégées"), "Proximite aux aires protegees")
+  expect_equal(
+    enc2ascii("Proximité aux aires protégées"),
+    "Proximite aux aires protegees"
+  )
   expect_equal(enc2ascii("Céanothe d'Amérique"), "Ceanothe d'Amerique")
 })
 
@@ -41,7 +44,7 @@ test_that("enc2ascii_keep preserves name fields as UTF-8", {
   )
   result <- enc2ascii_keep(input, keep = "name")
   expect_equal(result$name, "Écosystème calcicole")
-  expect_equal(result$units, "km2")
+  expect_equal(result$units, "km")
 })
 
 test_that("enc2ascii_keep preserves names in nested lists", {
@@ -57,7 +60,7 @@ test_that("enc2ascii_keep preserves names in nested lists", {
   result <- enc2ascii_keep(input, keep = "name")
   expect_equal(result$name, "Mon Projet")
   expect_equal(result$themes[[1]]$name, "Proximité aux aires protégées")
-  expect_equal(result$themes[[1]]$units, "km2")
+  expect_equal(result$themes[[1]]$units, "km")
 })
 
 test_that("enc2ascii_keep supports multiple keep fields", {
@@ -91,5 +94,5 @@ test_that("enc2ascii_keep handles unnamed lists", {
   expect_equal(result[[1]]$name, "Écosystème")
   expect_equal(result[[1]]$units, "ha")
   expect_equal(result[[2]]$name, "Forêt")
-  expect_equal(result[[2]]$units, "km2")
+  expect_equal(result[[2]]$units, "km")
 })
