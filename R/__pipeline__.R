@@ -2,7 +2,7 @@
 #'
 #' This script automates the process of creating a WTW project
 #' from start to finish. It performs the following steps:
-#' 
+#'
 #' 00. Sets up the environment and loads required packages.
 #' 01. Initializes the project folder structure.
 #' 02. Transforms the Area of Interest (AOI) shapefile into a 1km grid.
@@ -14,15 +14,15 @@
 #'     - attribute.csv.gz
 #'     - boundary.csv.gz
 #'
-#' @note Ensure that your `setup.toml` `[local]` and `[wtw]` paths are correctly 
-#' set, and that the WTW project directory is initialized with your `aoi.shp` 
+#' @note Ensure that your `setup.toml` `[local]` and `[wtw]` paths are correctly
+#' set, and that the WTW project directory is initialized with your `aoi.shp`
 #' copied over.
-#' 
-#' This script is intended to be run from an `.Rproj` file that has access to 
+#'
+#' This script is intended to be run from an `.Rproj` file that has access to
 #' the scripts in your WTW project's `R/` directory.
-#' 
+#'
 #' Follow the Where To Work Data Prep User Guide for detailed instructions.
-#' 
+#'
 #' Author: Dan Wismer, Data Specialist, Data and Analytics, IT
 #' -----------------------------------------------------------------------------
 
@@ -37,7 +37,7 @@ terra::gdalCache(size = 8000) # Set GDAL cache size to 8GB
 prep_paths <- configs$paths
 wtw <- configs$wtw
 
-# 01 Initialize project folder ---- 
+# 01 Initialize project folder ----
 source("R/01_init_project_folder.R")
 print("01 Intalizing project folder ...")
 init_project_folder(
@@ -59,7 +59,7 @@ print("03 Extracting 1km National data...")
 natdata(
   natdata_dir = prep_paths$natdata_dir,
   project_dir = prep_paths$project_dir
-) 
+)
 
 # 04 Build WTW project metadata ----
 source("R/04_metadata.R")
@@ -74,6 +74,8 @@ source("R/05_wtw.R")
 print("05 Building WTW project...")
 build_wtw_project(
   project_dir = prep_paths$project_dir,
+  punits = prep_paths$punits,
+  wtw_metadata = prep_paths$wtw_metadata,
   author = wtw$author,
   email = wtw$email,
   groups = wtw$groups,
