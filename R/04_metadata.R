@@ -266,6 +266,7 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
       category,
       "species" = dplyr::pull(wtw_species_meta_row, Goal),
       "habitat" = "0.2",
+      "agriculture" = "0.2",
       ""
     )
 
