@@ -15,6 +15,8 @@ create_project_folder <- function(project_dir) {
   suppressWarnings((dir.create(file.path(project_dir, "tifs", "themes", "species", "nsc_end"))))
   suppressWarnings((dir.create(file.path(project_dir, "tifs", "themes", "species", "nsc_sar"))))
   suppressWarnings((dir.create(file.path(project_dir, "tifs", "themes", "species", "nsc_spp"))))
+  suppressWarnings((dir.create(file.path(project_dir, "tifs", "themes", "species", "ncc_sdm"))))
+  suppressWarnings((dir.create(file.path(project_dir, "tifs", "themes", "species", "ncc_sar_aoh"))))
   suppressWarnings((dir.create(file.path(project_dir, "tifs", "themes", "habitat"))))
   suppressWarnings((dir.create(file.path(project_dir, "tifs", "weights"))))
   suppressWarnings((dir.create(file.path(project_dir, "tifs", "weights", "carbon"))))

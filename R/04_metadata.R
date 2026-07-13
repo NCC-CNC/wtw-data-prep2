@@ -78,6 +78,12 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
     } else if (grepl("species/nsc_spp", tif_path)) {
       wtw_species_meta_row <- dplyr::filter(wtw_species_meta$NSC_SPP, File == tif_name)
       wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, path == "themes/species/nsc_spp")
+    } else if (grepl("species/ncc_sdm", tif_path)) {
+      wtw_species_meta_row <- dplyr::filter(wtw_species_meta$NCC_SDM, File == tif_name)
+      wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, path == "themes/species/ncc_sdm")
+    } else if (grepl("species/ncc_sar_aoh", tif_path)) {
+      wtw_species_meta_row <- dplyr::filter(wtw_species_meta$NCC_SAR_AOH, File == tif_name)
+      wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, path == "themes/species/ncc_sar_aoh")
     } else {
       wtw_species_meta_row <- NULL
       wtw_prep_meta_row    <- dplyr::filter(wtw_prep_meta, wtw_file_name == tif_name)
@@ -150,6 +156,10 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
       short_name == "NSC_SAR" & u_values == 1 ~ "#d73027",
       short_name == "NSC_SPP" & u_values == 2 ~ legend_color,
       short_name == "NSC_SPP" & u_values == 1 ~ "#e6f598",
+      short_name == "NCC_SDM" & u_values == 2 ~ legend_color,
+      short_name == "NCC_SDM" & u_values == 1 ~ "#ecde10",
+      short_name == "NCC_SAR_AOH" & u_values == 2 ~ legend_color,
+      short_name == "NCC_SAR_AOH" & u_values == 1 ~ "#da10ec",
       short_name == "KBA" & u_values == 2 ~ legend_color,
       short_name == "KBA" & u_values == 1 ~ "#1c9099",
       short_name == "CPCAD" & u_values == 2 ~ legend_color,
@@ -178,6 +188,10 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
       short_name == "NSC_SAR" & u_values == 1 ~ "Occurrence",
       short_name == "NSC_SPP" & u_values == 2 ~ legend_label,
       short_name == "NSC_SPP" & u_values == 1 ~ "Occurrence",
+      short_name == "NCC_SDM" & u_values == 2 ~ legend_label,
+      short_name == "NCC_SDM" & u_values == 1 ~ "Habitat",
+      short_name == "NCC_SAR_AOH" & u_values == 2 ~ legend_label,
+      short_name == "NCC_SAR_AOH" & u_values == 1 ~ "Habitat",
       short_name == "KBA" & u_values == 2 ~ legend_label,
       short_name == "KBA" & u_values == 1 ~ "KBA",
       short_name == "CPCAD" & u_values == 2 ~ legend_label,
