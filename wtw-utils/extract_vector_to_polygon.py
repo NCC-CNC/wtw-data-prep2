@@ -13,8 +13,12 @@ arcpy.env.overwriteOutput = True
 
 # Get user params
 input_poly = arcpy.GetParameterAsText(0)
-input_vect = arcpy.GetParameterValue(4)
+input_vect = arcpy.GetParameter(4)
 
+# Get the values of the Input vectors parameter
+vect_list = []
+for row in range(input_vect.rowCount):
+  vect_list.append(input_vect.getTrueRow(row))
 
 # Create wtw id
 arcpy.AddField_management(input_poly, "WTWID", "LONG")
@@ -24,9 +28,9 @@ with arcpy.da.UpdateCursor(input_poly, ["WTWID"]) as cursor:
       cursor.updateRow(row)
 
 # Process each list item
-l = len(input_vect)
+l = len(vect_list)
 counter = 1
-for vector, short_name, unit in (input_vect):
+for vector, short_name, unit in (vect_list):
   file_name = arcpy.Describe(vector).name
   arcpy.AddMessage(f"... Processing {counter} of {l}: {file_name}")
 
