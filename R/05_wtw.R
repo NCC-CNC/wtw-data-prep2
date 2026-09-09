@@ -198,6 +198,19 @@ build_wtw_project <- function(
   ## Convert list to a combined SpatRaster
   raster_data <- do.call(c, raster_data)
 
+  ## Drop layers that have only zero or NA values, and their matching metadata rows
+  nonzero_idx <- which(terra::global(raster_data, "sum", na.rm = TRUE)$sum != 0)
+  dropped <- metadata$File[-nonzero_idx]
+  if (length(dropped) > 0) {
+    warning(
+      "Dropping ", length(dropped), " layer(s) with all zero/NA values in the AOI:\n",
+      paste0("  - ", dropped, collapse = "\n"),
+      call. = FALSE
+    )
+  }
+  raster_data <- raster_data[[nonzero_idx]]
+  metadata <- metadata[nonzero_idx, ]
+
   # Pre-processing -------------------------------------------------------------
 
   ## Prepare theme inputs ----
