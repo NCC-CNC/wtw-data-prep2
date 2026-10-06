@@ -1,7 +1,13 @@
 import arcpy
+import sys
 import os
-import subprocess
 import pandas as pd
+script_folder = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(script_folder)
+import fct_extract_raster as er
+import importlib
+importlib.reload(er)
+arcpy.AddMessage(f"Using {er.exactextract_info}")
 
 # Allow overwrite
 arcpy.env.overwriteOutput = True
@@ -11,37 +17,34 @@ path_to_poly = arcpy.GetParameterAsText(0)
 path_to_raster = arcpy.GetParameterAsText(1)
 stat = arcpy.GetParameterAsText(2)
 cell_value = arcpy.GetParameterAsText(3)
-col_name = arcpy.GetParameterAsText(4)       
-path_to_temp = arcpy.GetParameterAsText(5)
-csv = arcpy.GetParameterAsText(6)
-r_path = arcpy.GetParameterAsText(7) 
+col_name = arcpy.GetParameterAsText(4)
+csv = arcpy.GetParameterAsText(5)
 
+# Build input table
 if csv:
   csv_file_name = os.path.basename(csv)
   arcpy.AddMessage(f"Accessing data in: {csv_file_name}")
-
-# directory that has Rscript.exe  
-if r_path:
-  r_path = os.path.join(r_path, "bin", "Rscript.exe")
+  input_df = pd.read_csv(csv)
+  input_df = input_df[input_df["datatype"] == "raster"]
 else:
-  r_path = "Rscript" # Assumes Rscript is in PATH
+  # cell value must be provided if the statistic is area
+  if stat == "area" and not cell_value:
+    arcpy.AddError("Please provide a cell value for area stat.")
+    raise ValueError("Cell value is required for area stat.")
+  # Get the full path (Raster Layer or dataset)
+  path_to_raster = arcpy.Describe(path_to_raster).catalogPath
+  input_df = pd.DataFrame([{
+    "conversion_ready_input": path_to_raster,
+    "short_name": col_name,
+    "stat": stat,
+    "cell_value": cell_value or None
+  }])
 
-# cell value must be provided if the statistic is area or count
-if stat == "area":
-  if not cell_value:
-      arcpy.AddError("Please provide a cell value for area stat.")
-      raise ValueError("Cell value is required for area stat.")
-  
 # If user submited a feature class, get the full path
-if (arcpy.Describe(path_to_poly).dataType == "FeatureLayer"):
+if arcpy.Describe(path_to_poly).dataType == "FeatureLayer":
   path_to_poly = arcpy.Describe(path_to_poly).catalogPath
 # get polygon file name
 poly_file_name = os.path.basename(path_to_poly)
-  
-# If user submited a Raster Layer, get the full path
-if path_to_raster:
-  if (arcpy.Describe(path_to_raster).dataType == "RasterLayer"):
-    path_to_raster = arcpy.Describe(path_to_raster).catalogPath
 
 # Create wtw id
 arcpy.AddField_management(path_to_poly, "WTWID", "LONG")
@@ -50,83 +53,28 @@ with arcpy.da.UpdateCursor(path_to_poly, ["WTWID"]) as cursor:
       row[0] = i
       cursor.updateRow(row)
 
-# Path to R script
-script_folder = os.path.dirname(os.path.abspath(__file__))
-r_script = os.path.join(script_folder, "run_extract_raster.R")
-
-# Build command
-cmd = [
-    r_path,
-    r_script,
-    path_to_poly,
-    path_to_raster,
-    stat,
-    col_name,
-    path_to_temp,
-    cell_value or "",
-    csv or ""
-]
-
-# Run R script
-arcpy.AddMessage("... Running R script")
-
-try:
-  result = subprocess.Popen(
-      cmd,
-      stdout=subprocess.PIPE,
-      stderr=subprocess.PIPE,
-      text=True,
-      bufsize=1  # line-buffered output
+# --- EXTRACTION LOOP ---
+extracts = {} # field -> {WTWID: value}
+for row in input_df.itertuples():
+  file_name = os.path.basename(row.conversion_ready_input)
+  cell_value = None if pd.isna(row.cell_value) else float(row.cell_value)
+  arcpy.AddMessage(f"Extracting {file_name}: {row.stat}")
+  extracts[row.short_name] = er.extract_raster(
+    path_to_poly, row.conversion_ready_input, row.stat, cell_value
   )
-  
-  # Stream stdout in real time
-  for line in result.stdout:
-      arcpy.AddMessage("R: " + line.rstrip())
-  
-  # Stream stderr in real time
-  for line in result.stderr:
-      arcpy.AddWarning("R: " + line.rstrip())
-  
-  # Wait for process to finish
-  result.wait()
-      
-  if result.returncode != 0:
-      arcpy.AddError(f"R script failed with code {result.returncode}")
 
-except Exception as e:
-  arcpy.AddError(f"Failed to run R script: {e}")
-
-
-# Get column names from csv (if provided)
-if csv:
-  batch_csv = pd.read_csv(csv)
-  batch_csv = batch_csv[batch_csv["datatype"] == "raster"]
-  col_name = batch_csv["short_name"].tolist()
-
-# Convert one-off col name to list  
-if isinstance(col_name, str):
-    col_name = [col_name]
-  
-# Add new field
+# Add new fields as DOUBLE
+col_name = list(extracts)
 for field in col_name:
-  # Add field as DOUBLE        
   arcpy.AddField_management(path_to_poly, field, "DOUBLE")
 
-# Read-in r_extract.csv
-df = pd.read_csv(os.path.join(path_to_temp, "r_extract.csv"))
-# Create dictionary: WTWID -> {field: value, ...}
-r_dict = df.set_index("WTWID")[col_name].to_dict(orient="index")
-# Get list of fields
-fields = ["WTWID"] + col_name
-
-# Update polygon with values from r_extract.csv, dicitonary
+# Update polygon with extracted values
 arcpy.AddMessage(f"Joining extractions to {poly_file_name}")
 arcpy.AddMessage(f"Fields: {col_name}")
+fields = ["WTWID"] + col_name
 with arcpy.da.UpdateCursor(path_to_poly, fields) as cursor:
     for row in cursor:
         wtwid = row[0]
-        if wtwid in r_dict:
-            for i, field in enumerate(col_name, start=1):
-                row[i] = r_dict[wtwid][field]  # assign numeric value
-            cursor.updateRow(row)
-  
+        for i, field in enumerate(col_name, start=1):
+            row[i] = extracts[field].get(wtwid, 0)
+        cursor.updateRow(row)
