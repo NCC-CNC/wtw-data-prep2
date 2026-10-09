@@ -1,6 +1,7 @@
 import math
 import os
 import sys
+import threading
 import arcpy
 from osgeo import gdal
 
@@ -47,6 +48,25 @@ def read_polygons(path_to_poly, sr):
   return features
 
 def extract_raster(path_to_poly, path_to_raster, stat, cell_value = None):
+  # Run the extraction on a thread started by Python. exactextract (and GDAL's
+  # bindings) call back into Python from native code, which needs a thread
+  # Python's GIL state API knows. ArcGIS Pro's geoprocessing threads aren't,
+  # and repeated runs on them crashed Pro: "Fatal Python error: non-NULL old
+  # thread state".
+  outcome = {}
+  def run():
+    try:
+      outcome["vals"] = _extract_raster(path_to_poly, path_to_raster, stat, cell_value)
+    except BaseException as e:
+      outcome["error"] = e
+  thread = threading.Thread(target = run, name = "wtw-extract-raster")
+  thread.start()
+  thread.join()
+  if "error" in outcome:
+    raise outcome["error"]
+  return outcome["vals"]
+
+def _extract_raster(path_to_poly, path_to_raster, stat, cell_value = None):
 
   # Raster CRS, used to project polygons on read
   sr = arcpy.Describe(path_to_raster).spatialReference
