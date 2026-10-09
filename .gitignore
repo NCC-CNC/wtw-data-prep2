@@ -9,7 +9,7 @@ Python/__pycache__/
 
 *.lock
 
-wtw-utils/__pycache__/
+__pycache__/
 
 wtw-utils/test_extract_raster.R
 
