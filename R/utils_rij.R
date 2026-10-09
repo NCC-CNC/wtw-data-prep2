@@ -37,10 +37,13 @@ rij_to_raster <- function(
     r <- ncc_1km_idx
     terra::values(r)[idx] <- rij_data_clipped[name, ]
     names(r) <- name
-    
+
+    # Force round() when casting floats to integers because GDAL truncates by default
+    if (!grepl("^FLT|^DOUBLE", datatype, ignore.case = TRUE)) r <- round(r)
+
     # get output file name
     filename <- file.path(output_folder, paste0(prefix, name, ".tif"))
-    
+
     # crop
     terra::crop(
       x = r,
