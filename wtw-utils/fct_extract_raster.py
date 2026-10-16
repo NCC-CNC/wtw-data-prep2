@@ -1,32 +1,23 @@
 import math
-import os
 import sys
 import threading
 import arcpy
 from osgeo import gdal
 
-# Use exactextract from the active env if installed, otherwise fall back to the
-# vendored copy (unpacked wheel, built for one Python version, see README)
-vendor_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendor")
+# exactextract must be installed in Pro's active Python environment (see README)
 try:
   import exactextract
-except ImportError:
-  if vendor_dir not in sys.path:
-    sys.path.append(vendor_dir)
-  try:
-    import exactextract
-  except ImportError as e:
-    py = f"{sys.version_info.major}.{sys.version_info.minor}"
-    msg = (f"Could not load the bundled exactextract for Python {py}. "
-           "ArcGIS Pro may have been upgraded: replace wtw-utils/vendor "
-           f"with the exactextract wheel for Python {py} (see README).")
-    arcpy.AddError(msg)
-    raise ImportError(msg) from e
+except ImportError as e:
+  py = f"{sys.version_info.major}.{sys.version_info.minor}"
+  msg = (f"Could not load exactextract in the active ArcGIS Pro environment "
+         f"({sys.prefix}, Python {py}): {e}. Set up a Python environment with "
+         "exactextract installed and make it Pro's active environment (see "
+         "README, ArcGIS toolbox Python environment).")
+  arcpy.AddError(msg)
+  raise ImportError(msg) from e
 from exactextract import exact_extract
 from exactextract.feature import JSONFeatureSource
-is_bundled = os.path.normcase(exactextract.__file__).startswith(os.path.normcase(vendor_dir))
-source = "bundled" if is_bundled else "environment"
-exactextract_info = f"exactextract {exactextract.__version__} ({source})"
+exactextract_info = f"exactextract {exactextract.__version__} ({exactextract.__file__})"
 
 gdal.UseExceptions()
 

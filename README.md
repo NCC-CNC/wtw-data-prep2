@@ -17,11 +17,10 @@ It is recommended to install R directly on the C: drive.
 Recommended IDE for running and editing R scripts.
 - **Rtools 4.4**:  
 Required for building and installing R packages from source. It is recommended to install Rtools directly on the C: drive.
-- **ArcGIS Pro 3.7.1 (Python 3.13)**:   
+- **ArcGIS Pro 3.x**:   
 Used for displaying layers and running custom ArcGIS script tools. The toolbox is
-tested with Pro 3.7.1 and runs in Pro's default `arcgispro-py3` environment with no
-extra setup. Other Pro versions that use Python 3.13 are expected to work; see
-[ArcGIS toolbox Python environment](#arcgis-toolbox-python-environment).
+tested with Pro 3.7.1. It needs a Python environment with exactextract installed;
+see [ArcGIS toolbox Python environment](#arcgis-toolbox-python-environment).
 - **Git**:   
 For version control and managing code repositories.
 - **Personal GitHub account**:   
@@ -35,38 +34,34 @@ Needed to clone and sync IT managed GitHub repos locally.
 #### ArcGIS toolbox Python environment
 The toolbox uses only Python and arcpy; R is not required. `01b Extract Raster to
 Polygon` uses the [exactextract](https://pypi.org/project/exactextract/) Python
-package. A copy is bundled in `wtw-utils/vendor` (exactextract 0.3.0, built for
-Python 3.13), so the tool runs in Pro's default `arcgispro-py3` environment with
-no setup. The tool's first message shows which copy it is using, e.g.
-`Using exactextract 0.3.0 (bundled)`.
+package, which is not included in Pro's default `arcgispro-py3` environment (and
+that environment cannot be modified). Each user needs to set up a cloned
+environment with exactextract installed, once per Pro installation:
 
-**Optional: using a local environment.** If exactextract is installed in Pro's
-active environment, the tool uses that copy instead of the bundled one, and reports
-`(environment)`. This is not needed for normal use. Use it to try a different
-exactextract version, or to keep working if a Pro upgrade changes the Python
-version before the bundled copy is updated. From the ArcGIS Pro Python Command
-Prompt:
+1. Close ArcGIS Pro.
+2. From the Start menu, open **ArcGIS > Python Command Prompt** and run:
+
+   ```
+   conda create --clone arcgispro-py3 --name wtw-data-prep
+   activate wtw-data-prep
+   pip install exactextract --no-deps
+   ```
+
+   Cloning can take several minutes. pip installs the exactextract build that
+   matches your Pro's Python version.
+3. Open ArcGIS Pro, go to **Project > Package Manager**, set **Active Environment**
+   to `wtw-data-prep`, and restart Pro.
+
+The tool's first message shows the exactextract version and location it is using,
+e.g. `Using exactextract 0.3.0 (C:\Users\...\envs\wtw-data-prep\...)`. If exactextract cannot
+be loaded, the tool reports the active environment and Python version.
+
+Use `pip install --no-deps` rather than `conda install`, which can replace Pro's
+numpy or GDAL and break arcpy.
+
+**After upgrading ArcGIS Pro**, the cloned environment still contains the old
+Pro's packages and may no longer work. Delete it and repeat the steps above:
 
 ```
-conda create --clone arcgispro-py3 --name wtw-dev
-activate wtw-dev
-pip install exactextract --no-deps
+conda env remove --name wtw-data-prep
 ```
-
-Then in Pro go to Project > Package Manager > Active Environment and set `wtw-dev`
-as the active environment, and restart Pro. Use `pip install --no-deps` rather than
-`conda install`, which can replace Pro's numpy or GDAL and break arcpy.
-
-**Updating the bundled copy.** The bundled copy only works with the Python version
-it was built for. If Pro moves to a new Python version, the tool reports that it
-could not load the bundled exactextract. To update it, run the following from the
-repo folder in the ArcGIS Pro Python Command Prompt (replacing `3.13` with Pro's
-Python version):
-
-```
-rmdir /s /q wtw-utils\vendor
-pip install exactextract --target wtw-utils\vendor --only-binary=:all: --python-version 3.13 --platform win_amd64 --no-deps
-```
-
-This downloads the exactextract build for that Python version and unpacks it into
-`wtw-utils/vendor`, without changing any Python environment.
