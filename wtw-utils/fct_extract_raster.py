@@ -43,11 +43,16 @@ def extract_raster(path_to_poly, path_to_raster, stat, cell_value = None):
   # bindings) call back into Python from native code, which needs a thread
   # Python's GIL state API knows. ArcGIS Pro's geoprocessing threads aren't,
   # and repeated runs on them crashed Pro: "Fatal Python error: non-NULL old
-  # thread state".
+  # thread state". Read the polygons with arcpy here, on the calling thread:
+  # on older Pro versions a cursor opened on the worker thread kept its lock,
+  # so adding the result fields failed (ERROR 000464: Cannot get exclusive
+  # schema lock).
+  sr = arcpy.Describe(path_to_raster).spatialReference
+  polygons = read_polygons(path_to_poly, sr)
   outcome = {}
   def run():
     try:
-      outcome["vals"] = _extract_raster(path_to_poly, path_to_raster, stat, cell_value)
+      outcome["vals"] = _extract_raster(polygons, sr, path_to_raster, stat, cell_value)
     except BaseException as e:
       outcome["error"] = e
   thread = threading.Thread(target = run, name = "wtw-extract-raster")
@@ -57,12 +62,11 @@ def extract_raster(path_to_poly, path_to_raster, stat, cell_value = None):
     raise outcome["error"]
   return outcome["vals"]
 
-def _extract_raster(path_to_poly, path_to_raster, stat, cell_value = None):
+def _extract_raster(polygons, sr, path_to_raster, stat, cell_value = None):
 
-  # Raster CRS, used to project polygons on read
-  sr = arcpy.Describe(path_to_raster).spatialReference
+  # Polygons were read projected to the raster CRS (sr)
   wkt = gdal.Open(path_to_raster).GetProjection()
-  features = JSONFeatureSource(read_polygons(path_to_poly, sr), srs_wkt = wkt)
+  features = JSONFeatureSource(polygons, srs_wkt = wkt)
 
   # -- AREA ---
   if stat == "area":
