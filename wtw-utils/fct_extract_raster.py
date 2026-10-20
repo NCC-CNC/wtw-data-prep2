@@ -1,10 +1,19 @@
 import math
+import os
+import site
 import sys
 import threading
 import arcpy
 from osgeo import gdal
 
-# exactextract must be installed in Pro's active Python environment (see README)
+# Pro's embedded Python skips the user site-packages (pip install --user), so
+# add it, after the environment's own packages so Pro's copies always win
+user_site = site.getusersitepackages()
+if os.path.isdir(user_site) and user_site not in sys.path:
+  site.addsitedir(user_site)
+
+# exactextract must be installed in Pro's active Python environment or the user
+# site-packages (see README)
 try:
   import exactextract
 except ImportError as e:
