@@ -47,10 +47,16 @@ environment with exactextract installed, once per Pro installation:
    pip install exactextract --no-deps
    ```
 
-   Cloning can take several minutes. pip installs the exactextract build that
-   matches your Pro's Python version.
+   Cloning can take several minutes and goes quiet near the end; wait for
+   `Executing transaction: done` before running the next command. pip installs
+   the exactextract build that matches your Pro's Python version.
 3. Open ArcGIS Pro, go to **Project > Package Manager**, set **Active Environment**
    to `wtw-data-prep`, and restart Pro.
+
+A clone can need 20 GB or more of free space, depending on what the default
+environment contains (e.g. the deep learning packages). If you don't have that
+space, use the [user folder install](#alternative-user-folder-install-limited-disk-space)
+instead.
 
 The tool's first message shows the exactextract version and location it is using,
 e.g. `Using exactextract 0.3.0 (C:\Users\...\envs\wtw-data-prep\...)`. If exactextract cannot
@@ -65,3 +71,33 @@ Pro's packages and may no longer work. Delete it and repeat the steps above:
 ```
 conda env remove --name wtw-data-prep
 ```
+
+##### Alternative: user folder install (limited disk space)
+Where disk space is restricted, such as on AVD, where conda environments are
+stored on a profile disk of about 30 GB, install
+exactextract into your Python user folder instead of cloning. It needs a few MB
+and no admin rights, and the toolbox loads it with Pro's default environment.
+
+1. Close ArcGIS Pro.
+2. From the Start menu, open **ArcGIS > Python Command Prompt** (leave the
+   default `arcgispro-py3` environment active) and run:
+
+   ```
+   python -m pip install --user exactextract --no-deps
+   ```
+
+   This installs exactextract into `%APPDATA%\Python\Python3xx\site-packages`.
+3. Open ArcGIS Pro. No environment change is needed.
+
+The tool's first message should show a location under
+`AppData\Roaming\Python\Python3xx`. The user folder is shared by every Python of
+that version, so don't `pip install --user` other packages such as numpy or GDAL;
+a second copy can break arcpy. If a cloned environment with exactextract is
+active, its copy is used first.
+
+**After upgrading ArcGIS Pro** to a version with a new Python (e.g. 3.13 to 3.14),
+the user folder changes. Run the pip command above again.
+
+If an earlier clone failed partway (e.g. `No space left on device`), delete the
+`wtw-data-prep` folder in `%LOCALAPPDATA%\ESRI\conda\envs` and run `conda clean
+--all` to recover the space.
