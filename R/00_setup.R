@@ -42,9 +42,15 @@ setup <- function() {
     }
   }
 
-  # Install constechr from GitHub if missing or older than the pipeline needs
-  if (!requireNamespace("constechr", quietly = TRUE) ||
-      utils::packageVersion("constechr") < "0.2.0") {
+  # Install constechr from GitHub if missing or older than the pipeline needs.
+  # Check its version without loading it, and unload it before installing:
+  # reinstalling a loaded package corrupts it for the rest of the R session
+  constechr_ok <- tryCatch(
+    utils::packageVersion("constechr") >= "0.2.0",
+    error = function(e) FALSE
+  )
+  if (!constechr_ok) {
+    if ("constechr" %in% loadedNamespaces()) unloadNamespace("constechr")
     if (!requireNamespace("remotes", quietly = TRUE)) {
       install.packages("remotes", repos = "https://cloud.r-project.org")
     }
