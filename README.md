@@ -17,6 +17,11 @@ It is recommended to install R directly on the C: drive.
 Recommended IDE for running and editing R scripts.
 - **Rtools 4.4**:  
 Required for building and installing R packages from source. It is recommended to install Rtools directly on the C: drive.
+- **constechr**:  
+NCC's shared ConsTech R package ([NCC-CNC/constechr](https://github.com/NCC-CNC/constechr)),
+used for the planning unit grid and national data extraction. `00_setup.R` installs it from
+GitHub on the first run, or when the installed version is older than the pipeline needs, so
+that run needs internet access to github.com.
 - **ArcGIS Pro 3.x**:   
 Used for displaying layers and running custom ArcGIS script tools. The toolbox is
 tested with Pro 3.7.1. It needs a Python environment with exactextract installed;
@@ -29,7 +34,18 @@ Needed to clone and sync IT managed GitHub repos locally.
 #### Data Dependencies
 - NAT_DATA bundle (S:\CONS_TECH\PRZ\DATA\NAT_DATA\__VERSIONS__) 
 - Conversion-ready regional vector/raster layers
-- Area of Interest (AOI) shapefile polygon
+- Area of Interest (AOI) shapefile polygon, as a single feature (one row; a multipart polygon is fine)
+
+#### Tests
+The pipeline steps have tests in `tests/testthat`, which build small synthetic data at run
+time. From the repo root, run:
+
+```r
+testthat::test_dir("tests/testthat")
+```
+
+They need constechr 0.2.0 or later, and `openxlsx` for the `04_metadata.R` tests (skipped
+without it).
 
 #### ArcGIS toolbox Python environment
 The toolbox uses only Python and arcpy; R is not required. `01b Extract Raster to
