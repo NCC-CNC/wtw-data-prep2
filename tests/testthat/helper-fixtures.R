@@ -199,8 +199,7 @@ fixture_catalogue <- function() {
     ),
     values = c("0, 1", "", "", "", "0, 1", ""),
     unit = c("km2", "ha", "ha", "tonnes", "km2", "index"),
-    # The weight's provenance equals theme 1's (Forest), so known bug #22
-    # (weights get theme provenance) doesn't show in the main assertions
+    # A weight with a different provenance is tested separately (#22)
     provenance = rep("national", 6),
     visible = c(TRUE, FALSE, FALSE, FALSE, TRUE, FALSE),
     hidden = rep(FALSE, 6),

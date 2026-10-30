@@ -47,17 +47,14 @@ test_that("the catalogue is read in full despite its BOM and ' file_name'", {
   expect_identical(meta$active, c(TRUE, TRUE, TRUE, TRUE, TRUE, FALSE))
 })
 
-# --- known bugs --------------------------------------------------------------
+# --- categorical rasters (#23) -----------------------------------------------
 
 test_that("a categorical raster gets its own legend values", {
-  skip("Known bug #23: categorical rasters reuse previous raster's stats")
   skip_if_not_installed("openxlsx")
   project_dir <- copy_dir(PROJECT_04, "project")
-  # make the first file listed (the exclude) categorical. With terra
-  # attached, the stats block is skipped and u_values/max_value are undefined
-  # (stale on later files); without it, the bare is.factor() is
-  # base::is.factor() (always FALSE for a SpatRaster) and max() errors on the
-  # category labels
+  # make the first file listed (the exclude) categorical: its stats must come
+  # from the cell values, not the category labels, so the metadata is the
+  # same as without categories
 
   path <- file.path(project_dir, "tifs", "excludes", "E_NAT_Urban_fixture.tif")
   r <- terra::rast(path) * 1

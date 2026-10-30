@@ -373,10 +373,9 @@ test_that("check 4: a manual legend that doesn't match the raster stops", {
   )
 })
 
-# --- known bugs --------------------------------------------------------------
+# --- weight provenance (#22) -------------------------------------------------
 
 test_that("weights get their own provenance", {
-  skip("Known bug #22: weights get theme provenance")
   project_dir <- copy_dir(PROJECT_05, "project")
   edit_metadata(project_dir, function(m) {
     m$Provenance[m$Type == "weight"] <- "regional"
