@@ -12,9 +12,9 @@ Imports:
     config,
     Matrix,
     assertthat (>= 0.2.1),
+    constechr (>= 0.2.0),
     data.table (>= 1.17.6),
     dplyr (>= 1.1.4),
-    gdalUtilities (>= 1.2.5),
     glue (>= 1.8.0),
     prioritizr (>= 8.0.6),
     RcppTOML (>= 0.2.3),
@@ -30,6 +30,8 @@ Imports:
     uuid (>= 1.2-1),
     viridisLite (>= 0.4.2),
     yaml (>= 2.3.10)
+Remotes:
+    NCC-CNC/constechr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2

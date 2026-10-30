@@ -1,6 +1,7 @@
 #' Setup WTW Project
 #' 
-#' Installs any missing R packages required by the WTW project, reads in
+#' Installs any missing R packages required by the WTW project, including
+#' constechr from GitHub (https://github.com/NCC-CNC/constechr), reads in
 #' `setup.toml`, and stores user-specific paths and configuration settings
 #' in memory.
 #'
@@ -15,7 +16,6 @@ setup <- function() {
   required_pkgs <- c(
     "assertthat",
     "data.table",
-    "gdalUtilities",
     "dplyr",
     "glue",
     "prioritizr",
@@ -40,7 +40,17 @@ setup <- function() {
       message(sprintf("Installing %s...", pkg))
       install.packages(pkg, repos = "https://cloud.r-project.org")
     }
-  }  
+  }
+
+  # Install constechr from GitHub if missing or older than the pipeline needs
+  if (!requireNamespace("constechr", quietly = TRUE) ||
+      utils::packageVersion("constechr") < "0.2.0") {
+    if (!requireNamespace("remotes", quietly = TRUE)) {
+      install.packages("remotes", repos = "https://cloud.r-project.org")
+    }
+    message("Installing constechr...")
+    remotes::install_github("NCC-CNC/constechr", upgrade = "never")
+  }
 
   # Read-in toml and return configs
   toml <- "setup.toml"

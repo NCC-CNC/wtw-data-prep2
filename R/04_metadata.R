@@ -22,11 +22,12 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
   
   TIF_DIR <- file.path(project_dir, "tifs")
   WTW_SPECIES <- file.path(natdata_dir, "WTW_NAT_SPECIES_METADATA.xlsx")
-  WTW_PREP <- file.path(natdata_dir, "WTW_NAT_PREP_METADATA.csv")
-  
+
   # Read-in metadata
-  ## wtw prep metadata
-  wtw_prep_meta <- read.csv(WTW_PREP)
+  ## wtw prep metadata, all rows (active and inactive)
+  wtw_prep_meta <- constechr::read_natdata_metadata(
+    natdata_dir, active_only = FALSE
+  )
   
   ## wtw species metadata
   sheet_names <- readxl::excel_sheets(WTW_SPECIES)
