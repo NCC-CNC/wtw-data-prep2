@@ -358,7 +358,7 @@ build_wtw_project <- function(
           index = names(weight_data)[i],
           units = weight_units[i],
           legend = legend,
-          provenance = theme_provenance[i]
+          provenance = weight_provenance[i]
         ),
         status = TRUE,
         visible = weight_visible[i],

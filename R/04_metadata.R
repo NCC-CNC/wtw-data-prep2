@@ -94,14 +94,14 @@ create_wtw_metadata <- function(project_dir, natdata_dir) {
     r <- terra::rast(tif_list[i])
     
     # Get raster stats
-    if (!is.factor(r)) {
-      ## df
-      r_df <- terra::as.data.frame(r, na.rm=TRUE)
-      ## number of unique value
-      u_values <- nrow(unique(r_df)) |> as.numeric()
-      ## max raster value
-      max_value <- max(r_df) |> as.numeric() # <- CAN NOT GET MAX ON CATEGORICAL DATA
-    }
+    ## drop categories so stats use the cell values, not the category labels
+    if (any(terra::is.factor(r))) levels(r) <- NULL
+    ## df
+    r_df <- terra::as.data.frame(r, na.rm=TRUE)
+    ## number of unique value
+    u_values <- nrow(unique(r_df)) |> as.numeric()
+    ## max raster value
+    max_value <- max(r_df) |> as.numeric()
     
     ## FILE ----------------------------------------------------------------------
     FILE <- tif_name
