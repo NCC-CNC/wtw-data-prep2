@@ -27,6 +27,7 @@ Imports:
     stringr (>= 1.5.1),
     terra (>= 1.8-50),
     tibble (>= 3.2.1),
+    units (>= 1.0-1),
     uuid (>= 1.2-1),
     viridisLite (>= 0.4.2),
     yaml (>= 2.3.10)

@@ -685,6 +685,13 @@ new_dataset_from_auto <- function(x, id = uuid::UUIDgenerate()) {
       bm <- geodesic_boundary_matrix(spatial_data)
     } else {
       bm <- prioritizr::boundary_matrix(spatial_data)
+      # prioritizr returns CRS units for projected rasters, so convert to metres
+      if (inherits(spatial_data, "SpatRaster") && nzchar(terra::crs(spatial_data))) {
+        crs_units <- sf::st_crs(terra::crs(spatial_data))$ud_unit
+        if (!is.null(crs_units)) {
+          bm <- bm * as.numeric(units::set_units(crs_units, "m", mode = "standard"))
+        }
+      }
     }
     if (inherits(x, "SpatRaster")) {
       bm <- bm[attribute_data[["_index"]], attribute_data[["_index"]]]
