@@ -130,7 +130,7 @@ fixture_aoi_sf <- function() {
   )
 }
 
-# A two-feature AOI, for the error case
+# A two-feature AOI, which step 02 dissolves into one area
 fixture_aoi_two_sf <- function() {
   sf::st_sf(
     region = c("a", "b"),

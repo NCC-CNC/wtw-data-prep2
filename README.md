@@ -34,7 +34,7 @@ Needed to clone and sync IT managed GitHub repos locally.
 #### Data Dependencies
 - NAT_DATA bundle (S:\CONS_TECH\PRZ\DATA\NAT_DATA\__VERSIONS__) 
 - Conversion-ready regional vector/raster layers
-- Area of Interest (AOI) shapefile polygon, as a single feature (one row; a multipart polygon is fine)
+- Area of Interest (AOI) shapefile polygon (several features are dissolved into one area)
 
 #### Tests
 The pipeline steps have tests in `tests/testthat`, which build small synthetic data at run
@@ -44,7 +44,7 @@ time. From the repo root, run:
 testthat::test_dir("tests/testthat")
 ```
 
-They need constechr 0.2.0 or later, and `openxlsx` for the `04_metadata.R` tests (skipped
+They need constechr 0.4.0 or later, and `openxlsx` for the `04_metadata.R` tests (skipped
 without it).
 
 #### ArcGIS toolbox Python environment

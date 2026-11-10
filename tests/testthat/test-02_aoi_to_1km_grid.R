@@ -25,11 +25,11 @@ run_aoi_to_grid(PROJECT_02)
 
 # --- aoi.shp -----------------------------------------------------------------
 
-test_that("aoi.shp is the one AOI feature, attributes kept, in the template CRS", {
+test_that("aoi.shp is the AOI boundary, without attributes, in the template CRS", {
   aoi <- sf::read_sf(file.path(PROJECT_02, "aoi", "aoi.shp"))
 
   expect_equal(nrow(aoi), 1)
-  expect_identical(aoi$region, "Fixture")
+  expect_false("region" %in% names(aoi))
   expect_identical(
     as.character(sf::st_geometry_type(aoi)), "POLYGON"
   )
@@ -87,16 +87,19 @@ test_that("pu_1km.tif is INT1U 1s on the trimmed planning-unit extent", {
   expect_identical(file_values(path), c(1, 1, NA, 1, 1, 1))
 })
 
-# --- errors ------------------------------------------------------------------
+# --- multi-feature AOI ------------------------------------------------------
 
-test_that("a two-feature AOI errors and writes nothing", {
+test_that("a two-feature AOI is dissolved into one area", {
   project_dir <- aoi_project(two = TRUE)
-  before <- list.files(project_dir, recursive = TRUE)
 
-  expect_error(run_aoi_to_grid(project_dir), "one feature")
+  expect_no_error(run_aoi_to_grid(project_dir))
 
-  expect_identical(list.files(project_dir, recursive = TRUE), before)
-  expect_false(file.exists(file.path(project_dir, "aoi", "aoi.shp")))
-  expect_false(file.exists(file.path(project_dir, "aoi", "pu_1km.shp")))
-  expect_false(file.exists(file.path(project_dir, "aoi", "pu_1km.tif")))
+  aoi <- sf::read_sf(file.path(project_dir, "aoi", "aoi.shp"))
+  expect_equal(nrow(aoi), 1)
+  expect_false("region" %in% names(aoi))
+  expect_true(file.exists(file.path(project_dir, "aoi", "pu_1km.tif")))
+
+  # both parts get planning units: more than the one-feature AOI's five
+  pu <- sf::read_sf(file.path(project_dir, "aoi", "pu_1km.shp"))
+  expect_gt(nrow(pu), 5)
 })

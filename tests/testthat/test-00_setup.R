@@ -1,7 +1,7 @@
 # 00 Setup: setup() reads setup.toml from the working directory and installs
 # missing packages. install.packages() is replaced in setup()'s environment so
 # no test can install anything; tests that reach remotes::install_github()
-# mock it, and the others skip unless constechr >= 0.2.0 is installed.
+# mock it, and the others skip unless constechr >= 0.4.0 is installed.
 
 SETUP_PKGS <- c(
   "assertthat", "data.table", "dplyr", "glue", "prioritizr", "RcppTOML",
@@ -26,7 +26,7 @@ skip_unless_setup_complete <- function() {
   for (pkg in SETUP_PKGS) {
     skip_if_not_installed(pkg)
   }
-  skip_if_not_installed("constechr", minimum_version = "0.2.0")
+  skip_if_not_installed("constechr", minimum_version = "0.4.0")
 }
 
 write_setup_toml <- function(dir) {
@@ -179,7 +179,7 @@ test_that("setup() unloads an outdated constechr before installing it", {
     env$events,
     list(
       list("unload", "constechr"),
-      list("install_github", list("NCC-CNC/constechr", upgrade = "never"))
+      list("install_github", list("NCC-CNC/constechr@v0.4.0", upgrade = "never"))
     )
   )
   expect_length(env$installs, 0)
@@ -194,12 +194,12 @@ test_that("setup() installs a missing constechr without unloading it", {
 
   expect_equal(
     env$events,
-    list(list("install_github", list("NCC-CNC/constechr", upgrade = "never")))
+    list(list("install_github", list("NCC-CNC/constechr@v0.4.0", upgrade = "never")))
   )
 })
 
 test_that("setup() leaves an up-to-date constechr alone", {
-  env <- constechr_env(version = "0.2.0", loaded = TRUE)
+  env <- constechr_env(version = "0.4.0", loaded = TRUE)
   dir <- new_temp_dir("setup")
   write_setup_toml(dir)
 

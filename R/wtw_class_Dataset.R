@@ -678,15 +678,14 @@ new_dataset_from_auto <- function(x, id = uuid::UUIDgenerate()) {
   
   # build boundary data
   bm <- try({
-    # re-project sf if CRS is not projected. only used for generating boundary
-    if (inherits(spatial_data, "sf") && (sf::st_is_longlat(spatial_data))) {
-      bm_spatial_data  <- sf::st_transform(spatial_data, 3857)
+    # prepare boundary data. lat/long sf is passed as is: prioritizr uses
+    # terra::perim(), which returns geodesic metres. lat/long rasters need
+    # constechr::geodesic_boundary_matrix(), as prioritizr would use degrees.
+    if (inherits(spatial_data, "SpatRaster") && terra::is.lonlat(spatial_data)) {
+      bm <- constechr::geodesic_boundary_matrix(spatial_data)
     } else {
-      bm_spatial_data <- spatial_data
+      bm <- prioritizr::boundary_matrix(spatial_data)
     }
-    # prepare boundary data
-    str_tree <- inherits(x, "sf") && !identical(Sys.info()[["sysname"]], "Darwin")
-    bm <- prioritizr::boundary_matrix(bm_spatial_data)
     if (inherits(x, "SpatRaster")) {
       bm <- bm[attribute_data[["_index"]], attribute_data[["_index"]]]
     }

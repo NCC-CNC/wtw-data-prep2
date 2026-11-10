@@ -42,11 +42,12 @@ setup <- function() {
     }
   }
 
-  # Install constechr from GitHub if missing or older than the pipeline needs.
+  # Install the constechr release the pipeline is tested with if it's missing
+  # or older (keep the tag and version here in step with DESCRIPTION).
   # Check its version without loading it, and unload it before installing:
   # reinstalling a loaded package corrupts it for the rest of the R session
   constechr_ok <- tryCatch(
-    utils::packageVersion("constechr") >= "0.2.0",
+    utils::packageVersion("constechr") >= "0.4.0",
     error = function(e) FALSE
   )
   if (!constechr_ok) {
@@ -55,7 +56,7 @@ setup <- function() {
       install.packages("remotes", repos = "https://cloud.r-project.org")
     }
     message("Installing constechr...")
-    remotes::install_github("NCC-CNC/constechr", upgrade = "never")
+    remotes::install_github("NCC-CNC/constechr@v0.4.0", upgrade = "never")
   }
 
   # Read-in toml and return configs
