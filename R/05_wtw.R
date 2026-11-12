@@ -51,6 +51,7 @@ source("R/wtw_fct_enc2ascii.R")
 source("R/wtw_fct_color_palette.R")
 source("R/wtw_fct_write_project.R")
 source("R/fct_validate_manual_legend.R")
+source("R/fct_geodesic_boundary_matrix.R")
 build_wtw_project <- function(
   project_dir,
   punits,
@@ -358,7 +359,7 @@ build_wtw_project <- function(
           index = names(weight_data)[i],
           units = weight_units[i],
           legend = legend,
-          provenance = theme_provenance[i]
+          provenance = weight_provenance[i]
         ),
         status = TRUE,
         visible = weight_visible[i],
